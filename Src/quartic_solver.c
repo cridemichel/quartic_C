@@ -357,7 +357,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       if (errf==0)
         break;
 #if 1
-      if (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps)
+      if (isnan(errf) || isinf(errf) || (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps))
         {
           best=1;
           break;
