@@ -248,6 +248,21 @@ double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
+double vecG[4];
+double sum_kahan(int n, double vec[])
+{
+  double y, tmp, sum = 0.0, corr = 0.0;
+  int i;
+  for (i=0; i < n; i++)
+    {
+      y = corr + vec[i];
+      tmp = sum + y;
+      corr = (sum - tmp) + y;
+      sum = tmp;
+    }
+  sum += corr;
+  return sum;
+}
 double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, double cq, double dq)
 {
   /* Eqs. (48)-(51) in the manuscript */
@@ -257,12 +272,14 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
+#define NRITMAX 8
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
-  int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  int iter, k1, k2, best=0;
+  double x02, errf, errfold=-1, errfoldold=-1, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errfv[NRITMAX], xoldv[NRITMAX][4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -280,7 +297,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
     {
       errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
     }
-  for (iter = 0; iter < 8; iter++)
+  for (iter = 0; iter < NRITMAX; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -309,8 +326,10 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
       for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
+        {
+          xold[k1] = x[k1];
+          xoldv[iter][k1] = xold[k1];
+        }
       for (k1=0; k1 < 4; k1++)
         {
           x[k1] += -dx[k1]/det;
@@ -319,20 +338,48 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
+      errfoldold = errfold;
       errfold = errf;
+#if 1
+      errfv[iter] = errf;
       errf=0;
       for (k1=0; k1 < 4; k1++)
         {
           errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
+#else
+      for (k1=0; k1 < 4; k1++)
+        {
+          vecG[k1] = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+        }
+      errf = sum_kahan(4, vecG);
+#endif
       if (errf==0)
         break;
-      if (errf >= errfold)
+#if 1
+      if (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps)
         {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
+          best=1;
           break;
         }
+#endif
+    }
+  // always return best results
+  if (best==1)
+    {
+      double errfmin;
+      int j, jmin=0;
+      errfmin = errfv[0];
+      for (j=1; j < iter; j++)
+        {
+          if (errfv[j] < errfmin)
+            {
+              errfmin = errfv[j];
+              jmin = j;
+            }
+        }
+      for (k1=0; k1 < 4; k1++)
+        x[k1] = xoldv[jmin][k1];
     }
   *AQ=x[0];
   *BQ=x[1];
