@@ -364,7 +364,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
         }
 #endif
     }
-  // always return best results
+  // always return best result
   if (best==1)
     {
       double errfmin;
