@@ -344,9 +344,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
-      //errfoldold = errfold;
-      //errfold = errf;
-#if 1
       errfv[iter+1]=0;
       for (k1=0; k1 < 4; k1++)
         {
@@ -366,25 +363,13 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           itermin = iter + 1;
           errfmin = errfv[iter+1];
         }
-#else
-      for (k1=0; k1 < 4; k1++)
-        {
-          vecG[k1] = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-        }
-      errf = sum_kahan(4, vecG);
-#endif
       if (errfv[iter+1]==0)
         break;
-#if 1
-     
       if (iter > 0)
         {
           if (errfv[iter+1] - errfv[iter] > macheps && errfv[iter] - errfv[iter-1] > macheps)
-            {
-              break;
-            }
+            break;
         }
-#endif
     }
   // always return best result
   *AQ=xv[itermin][0];
