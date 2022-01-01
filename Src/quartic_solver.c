@@ -248,7 +248,7 @@ double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-double vecG[4];
+//double vecG[4];
 double sum_kahan(int n, double vec[])
 {
   double y, tmp, sum = 0.0, corr = 0.0;
@@ -272,7 +272,7 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-#define NRITMAX 8
+#define NRITMAX 6
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
@@ -328,7 +328,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       for (k1=0; k1 < 4; k1++)
         {
           xold[k1] = x[k1];
-          xoldv[iter][k1] = xold[k1];
+          //xoldv[iter][k1] = xold[k1];
         }
       for (k1=0; k1 < 4; k1++)
         {
@@ -338,10 +338,10 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
-      errfoldold = errfold;
+      //errfoldold = errfold;
       errfold = errf;
 #if 1
-      errfv[iter] = errf;
+      //errfv[iter] = errf;
       errf=0;
       for (k1=0; k1 < 4; k1++)
         {
@@ -357,18 +357,16 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       if (errf==0)
         break;
 #if 1
-      //      if (isnan(errf) || isinf(errf) || (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps)
-        //  || (errfoldold != -1 && errf - errfoldold > macheps))
-      if (errf - errfold > macheps)
+      if (isnan(errf) || isinf(errf) || (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps)
+          || (errfoldold != -1 && errf - errfoldold > macheps))
         {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          best=0;
+          best=1;
           break;
         }
 #endif
     }
   // always return best result
+#if 1
   if (best==1)
     {
       double errfmin;
@@ -385,6 +383,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       for (k1=0; k1 < 4; k1++)
         x[k1] = xoldv[jmin][k1];
     }
+#endif
   *AQ=x[0];
   *BQ=x[1];
   *CQ=x[2];
