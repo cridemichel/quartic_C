@@ -357,9 +357,13 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       if (errf==0)
         break;
 #if 1
-      if (isnan(errf) || isinf(errf) || (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps))
+      //      if (isnan(errf) || isinf(errf) || (errfoldold != -1 && errf - errfold > macheps && errfold - errfoldold > macheps)
+        //  || (errfoldold != -1 && errf - errfoldold > macheps))
+      if (errf - errfold > macheps)
         {
-          best=1;
+          for (k1=0; k1 < 4; k1++)
+            x[k1] = xold[k1];
+          best=0;
           break;
         }
 #endif
