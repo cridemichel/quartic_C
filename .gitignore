@@ -1,2 +1,4 @@
 TESTS/
 Session.vim
+.viminfo
+**/*.swp
