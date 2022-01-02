@@ -272,7 +272,7 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-#define NRITMAX 8
+#define NRITMAX 4
 void calc_terms(double *t, double *x, double a, double b, double c, double d)
 {
   t[0] = x[1]*x[3];
