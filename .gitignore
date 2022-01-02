@@ -1,0 +1,6 @@
+Session.vim
+**/*.o
+**/*.swp
+bin/*
+TESTS/*
+.viminfo
