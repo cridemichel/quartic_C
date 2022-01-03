@@ -577,6 +577,7 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
 
       if (errx< macheps_cmplx)
         break;
+
       if (errfv[iter+1] < macheps_cmplx)
         break;
 
@@ -585,7 +586,7 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
       else 
         ninc = 0;
 
-      if (ninc==nincmax)
+      if (ninc == nincmax)
         break;
     }
   *AQ=xv[itermin][0];

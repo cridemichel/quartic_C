@@ -335,6 +335,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           for (k2=0; k2 < 4; k2++)
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
+
       errx=0.0;
       for (k1=0; k1 < 4; k1++)
         {
@@ -346,6 +347,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
+
       errfv[iter+1]=0;
       for (k1=0; k1 < 4; k1++)
         {
@@ -365,14 +367,18 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           itermin = iter + 1;
           errfmin = errfv[iter+1];
         }
+
       if (errx < macheps)
         break;
+
       if (errfv[iter+1] < macheps)
         break;
+
       if (errfv[iter+1] > errfv[iter])
         ninc++;
       else
         ninc=0;
+
       // ninc is the number of times that errv has increased
       if (ninc == nincmax)
         break; 
