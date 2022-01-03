@@ -481,8 +481,7 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
   int iter, k1, k2, itermin, ninc=0;
   const int nincmax = 2;
   complex double x02, xold[4], dx[4], x[4], det, delx, Jinv[4][4], fvec[4], vr[4], xv[NRITMAX+1][4];
-  double errx, errf, errfold;
-  double errfmin, errfv[NRITMAX+1];
+  double errx, errfmin, errfv[NRITMAX+1];
 
   x[0] = *AQ;
   x[1] = *BQ;
