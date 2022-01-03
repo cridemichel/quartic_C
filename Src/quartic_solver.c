@@ -299,10 +299,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
     {
       errfv[0] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
     }
-  if (errfv[0]==0)
-    {
-      return;
-    }
+  if (errfv[0] < macheps)
+    return;
   errfmin = errfv[0];
   itermin = 0;
   for (k1=0; k1 < 4; k1++)
@@ -343,8 +341,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           delx = -dx[k1]/det;
           errx += (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
           x[k1] += delx;
-          //if (k1 == 0 || delxrel > delxmax) 
-            //delxmax = delxrel;
         }
       fvec[0] = x[1]*x[3] - d;
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
