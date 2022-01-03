@@ -351,13 +351,11 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
         {
           errfv[iter+1] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
-#if 1
       // do we need this?
       if (isnan(errfv[iter+1]) || isinf(errfv[iter+1])) 
         {
           break;
         }
-#endif
       if (errfv[iter+1] < errfmin)
         {
           for (k1=0; k1 < 4; k1++)
