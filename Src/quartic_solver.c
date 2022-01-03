@@ -272,203 +272,15 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-#define NRITMAX 4
-void calc_terms(double *t, double *x, double a, double b, double c, double d)
-{
-  t[0] = x[1]*x[3];
-  t[1] = -d;
-  t[2] = x[1]*x[2];
-  t[3] = x[0]*x[3];
-  t[4] = -c;
-  t[5] = x[1];
-  t[6] = x[0]*x[2];
-  t[7] = x[3];
-  t[8] = -b;
-  t[9] = x[0];
-  t[10] = x[2];
-  t[11] = -a;
-}
-void oqs_NRabcd_semiorig(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
-{
-  /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
-   * coefficients a,b,c,d */
-  int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  x[0] = *AQ;
-  x[1] = *BQ;
-  x[2] = *CQ;
-  x[3] = *DQ;
-  vr[0] = d;
-  vr[1] = c;
-  vr[2] = b;
-  vr[3] = a;
-  fvec[0] = x[1]*x[3] - d;
-  fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
-  fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
-  fvec[3] = x[0] + x[2] - a; 
-  errf=0;
-  for (k1=0; k1 < 4; k1++)
-    {
-      errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-    }
-  for (iter = 0; iter < 8; iter++)
-    {
-      x02 = x[0]-x[2];
-      det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
-      if (det==0.0)
-        break;
-      Jinv[0][0] = x02;
-      Jinv[0][1] = x[3] - x[1];
-      Jinv[0][2] = x[1]*x[2] - x[0]*x[3];
-      Jinv[0][3] = -x[1]*Jinv[0][1] - x[0]*Jinv[0][2]; 
-      Jinv[1][0] = x[0]*Jinv[0][0] + Jinv[0][1];
-      Jinv[1][1] = -x[1]*Jinv[0][0];
-      Jinv[1][2] = -x[1]*Jinv[0][1];   
-      Jinv[1][3] = -x[1]*Jinv[0][2];
-      Jinv[2][0] = -Jinv[0][0];
-      Jinv[2][1] = -Jinv[0][1];
-      Jinv[2][2] = -Jinv[0][2];
-      Jinv[2][3] = Jinv[0][2]*x[2] + Jinv[0][1]*x[3];
-      Jinv[3][0] = -x[2]*Jinv[0][0] - Jinv[0][1];
-      Jinv[3][1] = Jinv[0][0]*x[3];
-      Jinv[3][2] = x[3]*Jinv[0][1];
-      Jinv[3][3] = x[3]*Jinv[0][2];
-      for (k1=0; k1 < 4; k1++)
-        {
-          dx[k1] = 0;
-          for (k2=0; k2 < 4; k2++)
-            dx[k1] += Jinv[k1][k2]*fvec[k2];
-        }
-      for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
-        {
-          x[k1] += -dx[k1]/det;
-        }
-      fvec[0] = x[1]*x[3] - d;
-      fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
-      fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
-      fvec[3] = x[0] + x[2] - a; 
-      errfold = errf;
-      errf=0;
-      for (k1=0; k1 < 4; k1++)
-        {
-          errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-        }
-      if (errf==0)
-        break;
-      if (errf > errfold + macheps)
-        {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
-        }
-    }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
-}
-void oqs_NRabcd_prova(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
-{
-  /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
-   * coefficients a,b,c,d */
-  int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  double t[12];
-  x[0] = *AQ;
-  x[1] = *BQ;
-  x[2] = *CQ;
-  x[3] = *DQ;
-  vr[0] = d;
-  vr[1] = c;
-  vr[2] = b;
-  vr[3] = a;
-
-  calc_terms(t, x, a, b, c, d);
-  fvec[0] = t[0] + t[1];
-  fvec[1] = t[2] + t[3] + t[4];
-  fvec[2] = t[5] + t[6] + t[7] + t[8];
-  fvec[3] = t[9] + t[10] + t[11]; 
-  errf=0;
-
-  for (k1=0; k1 < 12; k1++)
-    {
-      errf += t[k1];
-      //errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-    }
-  errf=fabs(errf);
-  for (iter = 0; iter < 8; iter++)
-    {
-      x02 = x[0]-x[2];
-      det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
-      if (det==0.0)
-        break;
-      Jinv[0][0] = x02;
-      Jinv[0][1] = x[3] - x[1];
-      Jinv[0][2] = x[1]*x[2] - x[0]*x[3];
-      Jinv[0][3] = -x[1]*Jinv[0][1] - x[0]*Jinv[0][2]; 
-      Jinv[1][0] = x[0]*Jinv[0][0] + Jinv[0][1];
-      Jinv[1][1] = -x[1]*Jinv[0][0];
-      Jinv[1][2] = -x[1]*Jinv[0][1];   
-      Jinv[1][3] = -x[1]*Jinv[0][2];
-      Jinv[2][0] = -Jinv[0][0];
-      Jinv[2][1] = -Jinv[0][1];
-      Jinv[2][2] = -Jinv[0][2];
-      Jinv[2][3] = Jinv[0][2]*x[2] + Jinv[0][1]*x[3];
-      Jinv[3][0] = -x[2]*Jinv[0][0] - Jinv[0][1];
-      Jinv[3][1] = Jinv[0][0]*x[3];
-      Jinv[3][2] = x[3]*Jinv[0][1];
-      Jinv[3][3] = x[3]*Jinv[0][2];
-      for (k1=0; k1 < 4; k1++)
-        {
-          dx[k1] = 0;
-          for (k2=0; k2 < 4; k2++)
-            dx[k1] += Jinv[k1][k2]*fvec[k2];
-        }
-      for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
-        {
-          x[k1] += -dx[k1]/det;
-        }
-      calc_terms(t, x, a, b, c, d);
-      fvec[0] = t[0] + t[1];
-      fvec[1] = t[2] + t[3] + t[4];
-      fvec[2] = t[5] + t[6] + t[7] + t[8];
-      fvec[3] = t[9] + t[10] + t[11]; 
-      errfold = errf;
-      errf=0;
-      for (k1=0; k1 < 12; k1++)
-        {
-          errf += t[k1];
-          //errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-        }
-      
-      errf=fabs(errf);
-      if (errf==0)
-        break;
-      if (errf >= errfold)
-        {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
-        }
-    }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
-}
+#define NRITMAX 8
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
-  int iter, k1, k2, itermin;
-  double x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  double errfmin, errfv[NRITMAX+1], xv[NRITMAX+1][4];
+  int ninc=0, iter, k1, k2, itermin;
+  const int nincmax = 2;
+  double delxrel, delx, delxmax, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errfmin, errf, errfv[NRITMAX+1], xv[NRITMAX+1][4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -484,7 +296,9 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   errfv[0]=0;
   for (k1=0; k1 < 4; k1++)
     {
-      errfv[0] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      errf = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      if (k1==0 || errf > errfv[0])
+        errfv[0] = errf;
     }
   if (errfv[0]==0)
     {
@@ -494,7 +308,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   itermin = 0;
   for (k1=0; k1 < 4; k1++)
     {
-      //xold[k1] = x[k1];
       xv[0][k1] = x[k1];
     }
   for (iter = 0; iter < NRITMAX; iter++)
@@ -525,9 +338,13 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           for (k2=0; k2 < 4; k2++)
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
-     for (k1=0; k1 < 4; k1++)
+      for (k1=0; k1 < 4; k1++)
         {
-          x[k1] += -dx[k1]/det;
+          delx = -dx[k1]/det;
+          delxrel = (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
+          x[k1] += delx;
+          if (k1 == 0 || delxrel > delxmax) 
+            delxmax = delxrel;
         }
       fvec[0] = x[1]*x[3] - d;
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
@@ -536,9 +353,12 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       errfv[iter+1]=0;
       for (k1=0; k1 < 4; k1++)
         {
-          errfv[iter+1] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+          errf= (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+          if (k1==0 || errfv[iter+1] > errf)
+            errfv[iter+1] = errf;
         }
-#if 1
+#if 0
+      // do we need this?
       if (isnan(errfv[iter+1]) || isinf(errfv[iter+1])) 
         {
           break;
@@ -553,20 +373,19 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           itermin = iter + 1;
           errfmin = errfv[iter+1];
         }
-     
-      if (errfv[iter+1]==0)
-        break;
-#if 1
-      if (iter > 0)
+      if (delxmax < macheps)
         {
-          if (errfv[iter+1] - errfv[iter] > macheps && errfv[iter] - errfv[iter-1] > macheps)
-            break;
+          break;
         }
-#else
-      if (errfv[iter+1] > errfv[iter])
+      if (errfv[iter+1] < macheps)
         break;
-  
-#endif
+      if (errfv[iter+1] > errfv[iter])
+        ninc++;
+      else
+        ninc=0;
+      // ninc is the number of times that errv has increased
+      if (ninc == nincmax)
+        break; 
     }
   // always return best result
   *AQ=xv[itermin][0];
