@@ -280,8 +280,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   int ninc=0, iter, k1, k2, itermin;
   // nincmax=2 means "if maximum relative error of coefficients increases twice stop the NR"
   const int nincmax = 2;
-  double delxrel, delx, delxmax, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  double errfmin, errf, errfv[NRITMAX+1], xv[NRITMAX+1][4];
+  double delx, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errfmin, errfv[NRITMAX+1], xv[NRITMAX+1][4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -297,9 +297,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   errfv[0]=0;
   for (k1=0; k1 < 4; k1++)
     {
-      errf = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-      if (k1==0 || errf > errfv[0])
-        errfv[0] = errf;
+      errfv[0] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
     }
   if (errfv[0]==0)
     {
@@ -339,13 +337,14 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           for (k2=0; k2 < 4; k2++)
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
+      errx=0.0;
       for (k1=0; k1 < 4; k1++)
         {
           delx = -dx[k1]/det;
-          delxrel = (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
+          errx += (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
           x[k1] += delx;
-          if (k1 == 0 || delxrel > delxmax) 
-            delxmax = delxrel;
+          //if (k1 == 0 || delxrel > delxmax) 
+            //delxmax = delxrel;
         }
       fvec[0] = x[1]*x[3] - d;
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
@@ -354,9 +353,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       errfv[iter+1]=0;
       for (k1=0; k1 < 4; k1++)
         {
-          errf= (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-          if (k1==0 || errfv[iter+1] > errf)
-            errfv[iter+1] = errf;
+          errfv[iter+1] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
 #if 1
       // do we need this?
@@ -374,10 +371,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           itermin = iter + 1;
           errfmin = errfv[iter+1];
         }
-      if (delxmax < macheps)
-        {
-          break;
-        }
+      if (errx < macheps)
+        break;
       if (errfv[iter+1] < macheps)
         break;
       if (errfv[iter+1] > errfv[iter])
