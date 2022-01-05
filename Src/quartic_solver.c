@@ -277,7 +277,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
-  int ninc=0, iter, k1, k2, itermin;
+  int ninc=0, iter, k1, k2;
   // nincmax=2 means "if maximum relative error of coefficients increases twice stop the NR"
   const int nincmax = 2;
   double delx, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
@@ -304,7 +304,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   if (errf < macheps) 
     return;
   errfmin = errf;
-  itermin = 0;
   for (k1=0; k1 < 4; k1++)
     {
       xmin[k1] = x[k1];
@@ -367,7 +366,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
             {
               xmin[k1] = x[k1];
             }
-          itermin = iter + 1;
           errfmin = errf;
         }
 
