@@ -280,7 +280,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   int ninc=0, iter, k1, k2;
   // nincmax=2 means "if maximum relative error of coefficients increases twice stop the NR"
   const int nincmax = 2;
-  double delx[4], delxrel, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double delx, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
   double errfmin, errfold, errf, xmin[4];
   //static long int sumiter=0, ncalls=0;
   
@@ -296,7 +296,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
-  errf = 0;
+  errf=0;
   for (k1=0; k1 < 4; k1++)
     {
       errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
@@ -340,18 +340,10 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       errx=0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          delx[k1] = -dx[k1]/det;
-          delxrel = (x[k1]==0)?fabs(delx[k1]):fabs(delx[k1]/x[k1]);
-          if (k1==0 || delxrel > errx)
-            errx = delxrel;
+          delx = -dx[k1]/det;
+          errx += (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
+          x[k1] += delx;
         }
-      if (errx < macheps/2) // if maximum variation of x is less than macheps, then x won't change at all!
-        break;
-
-      for (k1=0; k1 < 4; k1++)
-        {
-          x[k1] += delx[k1];
-        } 
       fvec[0] = x[1]*x[3] - d;
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
@@ -377,6 +369,9 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           errfmin = errf;
         }
 
+      if (errx < macheps)
+        break;
+
       if (errf < macheps)
         break;
 
@@ -389,6 +384,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       if (ninc == nincmax)
         break; 
     }
+        
 #if 0
   ncalls++;
   sumiter+=iter;
