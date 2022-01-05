@@ -281,7 +281,9 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   // nincmax=2 means "if maximum relative error of coefficients increases twice stop the NR"
   const int nincmax = 2;
   double delx, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  double errfmin, errfv[NRITMAX+1], xv[NRITMAX+1][4];
+  double errfmin, errfold, errf, xmin[4];
+  //static long int sumiter=0, ncalls=0;
+  
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -294,18 +296,18 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
-  errfv[0]=0;
+  errf=0;
   for (k1=0; k1 < 4; k1++)
     {
-      errfv[0] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
     }
-  if (errfv[0] < macheps)
+  if (errf < macheps) 
     return;
-  errfmin = errfv[0];
+  errfmin = errf;
   itermin = 0;
   for (k1=0; k1 < 4; k1++)
     {
-      xv[0][k1] = x[k1];
+      xmin[k1] = x[k1];
     }
   for (iter = 0; iter < NRITMAX; iter++)
     {
@@ -348,33 +350,34 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
 
-      errfv[iter+1]=0;
+      errfold = errf;
+      errf=0;
       for (k1=0; k1 < 4; k1++)
         {
-          errfv[iter+1] += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+          errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
       // do we need this?
-      if (isnan(errfv[iter+1]) || isinf(errfv[iter+1])) 
+      if (isnan(errf) || isinf(errf)) 
         {
           break;
         }
-      if (errfv[iter+1] < errfmin)
+      if (errf < errfmin)
         {
           for (k1=0; k1 < 4; k1++)
             {
-              xv[iter+1][k1] = x[k1];
+              xmin[k1] = x[k1];
             }
           itermin = iter + 1;
-          errfmin = errfv[iter+1];
+          errfmin = errf;
         }
 
       if (errx < macheps)
         break;
 
-      if (errfv[iter+1] < macheps)
+      if (errf < macheps)
         break;
 
-      if (errfv[iter+1] > errfv[iter])
+      if (errf > errfold)
         ninc++;
       else
         ninc=0;
@@ -383,11 +386,23 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       if (ninc == nincmax)
         break; 
     }
+        
+#if 0
+  ncalls++;
+  sumiter+=iter;
+  if (ncalls % 10000==0)
+    printf("avg iter=%G\n", (double)sumiter/ncalls);
+  if (iter==NRITMAX)
+    {
+      printf("NR did not converge\n");
+      printf("errx: %.18G errfmin: %.18G\n", errx, errfmin);
+    }
+#endif
   // always return best result
-  *AQ=xv[itermin][0];
-  *BQ=xv[itermin][1];
-  *CQ=xv[itermin][2];
-  *DQ=xv[itermin][3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
 void oqs_solve_quadratic(double a, double b, complex double roots[2])
 { 
