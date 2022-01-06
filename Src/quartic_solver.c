@@ -287,7 +287,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   errfmin = errfa;
   if (errfa==0)
     return;
-  //printf("errf0=%.16G\n", errf);
+  // on average 2 iterations are sufficient...
   for (iter = 0; iter < 6; iter++)
     {
       x02 = x[0]-x[2];
@@ -344,6 +344,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
         }
       if (errf==0)
         break;
+      // stop only if both total absolute and relative errors are increasing (try harder with respect to original
+      // version)
       if (errf >= errfold && errfa >= errfaold)
         {
           //for (k1=0; k1 < 4; k1++)
