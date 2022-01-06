@@ -248,21 +248,6 @@ double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-//double vecG[4];
-double sum_kahan(int n, double vec[])
-{
-  double y, tmp, sum = 0.0, corr = 0.0;
-  int i;
-  for (i=0; i < n; i++)
-    {
-      y = corr + vec[i];
-      tmp = sum + y;
-      corr = (sum - tmp) + y;
-      sum = tmp;
-    }
-  sum += corr;
-  return sum;
-}
 double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, double cq, double dq)
 {
   /* Eqs. (48)-(51) in the manuscript */
@@ -272,18 +257,12 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-#define NRITMAX 8
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
-  int ninc=0, iter, k1, k2;
-  // nincmax=2 means "if maximum relative error of coefficients increases twice stop the NR"
-  const int nincmax = 2;
-  double delx, errx, x02, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
-  double errfmin, errfold, errf, xmin[4];
-  //static long int sumiter=0, ncalls=0;
-  
+  int iter, k1, k2;
+  double x02, errf, errfa, errfold, errfaold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -296,19 +275,15 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
-  errf=0;
+  errf=errfa=0;
   for (k1=0; k1 < 4; k1++)
     {
+      //printf("errf (iter=0, k1=%d) =%.16G, %.16G\n", k1, fabs(fvec[k1]), fabs(fvec[k1]/vr[k1]));
+      errfa += fabs(fvec[k1]);
       errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
     }
-  if (errf < macheps) 
-    return;
-  errfmin = errf;
-  for (k1=0; k1 < 4; k1++)
-    {
-      xmin[k1] = x[k1];
-    }
-  for (iter = 0; iter < NRITMAX; iter++)
+  //printf("errf0=%.16G\n", errf);
+  for (iter = 0; iter < 8; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -336,71 +311,39 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           for (k2=0; k2 < 4; k2++)
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
+      for (k1=0; k1 < 4; k1++)
+        xold[k1] = x[k1];
 
-      errx=0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          delx = -dx[k1]/det;
-          errx += (x[k1]==0)?fabs(delx):fabs(delx/x[k1]);
-          x[k1] += delx;
+          x[k1] += -dx[k1]/det;
         }
       fvec[0] = x[1]*x[3] - d;
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
-
       errfold = errf;
-      errf=0;
+      errfaold = errfa;
+      errf=errfa=0;
       for (k1=0; k1 < 4; k1++)
         {
+          //printf("errf (iter=%d k1=%d) =%.16G, %.16G\n", iter+1, k1, fabs(fvec[k1]), fabs(fvec[k1]/vr[k1]));
+          errfa += fabs(fvec[k1]);
           errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
-      // do we need this?
-      if (isnan(errf) || isinf(errf)) 
-        {
-          break;
-        }
-      if (errf < errfmin)
+      if (errf==0)
+        break;
+      if (errf >= errfold && errfa >= errfaold)
         {
           for (k1=0; k1 < 4; k1++)
-            {
-              xmin[k1] = x[k1];
-            }
-          errfmin = errf;
+            x[k1] = xold[k1];
+          break;
         }
-
-      if (errx < macheps)
-        break;
-
-      if (errf < macheps)
-        break;
-
-      if (errf > errfold)
-        ninc++;
-      else
-        ninc=0;
-
-      // ninc is the number of times that errv has increased
-      if (ninc == nincmax)
-        break; 
     }
-        
-#if 0
-  ncalls++;
-  sumiter+=iter;
-  if (ncalls % 10000==0)
-    printf("avg iter=%G\n", (double)sumiter/ncalls);
-  if (iter==NRITMAX)
-    {
-      printf("NR did not converge\n");
-      printf("errx: %.18G errfmin: %.18G\n", errx, errfmin);
-    }
-#endif
-  // always return best result
-  *AQ=xmin[0];
-  *BQ=xmin[1];
-  *CQ=xmin[2];
-  *DQ=xmin[3];
+  *AQ=x[0];
+  *BQ=x[1];
+  *CQ=x[2];
+  *DQ=x[3];
 }
 void oqs_solve_quadratic(double a, double b, complex double roots[2])
 { 
