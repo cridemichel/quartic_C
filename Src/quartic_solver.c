@@ -262,7 +262,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
   int iter, k1, k2;
-  double x02, errf, errfa, errfold, errfaold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double x02, errfmin, errf, errfa, errfold, errfaold, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -281,9 +282,13 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       //printf("errf (iter=0, k1=%d) =%.16G, %.16G\n", k1, fabs(fvec[k1]), fabs(fvec[k1]/vr[k1]));
       errfa += fabs(fvec[k1]);
       errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      xmin[k1] = x[k1];
     }
+  errfmin = errfa;
+  if (errfa==0)
+    return;
   //printf("errf0=%.16G\n", errf);
-  for (iter = 0; iter < 8; iter++)
+  for (iter = 0; iter < 6; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -311,8 +316,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           for (k2=0; k2 < 4; k2++)
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
-      for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
+      //for (k1=0; k1 < 4; k1++)
+        //xold[k1] = x[k1];
 
       for (k1=0; k1 < 4; k1++)
         {
@@ -331,19 +336,25 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
           errfa += fabs(fvec[k1]);
           errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
         }
+      if (errfa < errfmin)
+        {
+          errfmin = errfa;
+          for (k1=0; k1 < 4; k1++)
+            xmin[k1]=x[k1];
+        }
       if (errf==0)
         break;
       if (errf >= errfold && errfa >= errfaold)
         {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
+          //for (k1=0; k1 < 4; k1++)
+            //x[k1] = xold[k1];
           break;
         }
     }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
 void oqs_solve_quadratic(double a, double b, complex double roots[2])
 { 
