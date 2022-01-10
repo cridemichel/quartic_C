@@ -257,17 +257,21 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-#define ABS_ERROR
+//#define ABS_ERROR
+#define NITERMAX 8
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
-  int cc, iter, k1, k2;
+  int iter, k1, k2;
   double x02, errfmin, errf, x[4], dx[4], det, Jinv[4][4], fvec[4];
 #ifndef ABS_ERROR
-  double vr[4];
+  double vr[4], errfold, errfa, fveca;
+#else
+  double errfvold[4], errfv[4];
+  int cc;
 #endif
-  double xmin[4], errfv[4], errfvold[4];
+  double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -283,22 +287,30 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
   errf=0;
+#ifndef ABS_ERROR
+  errfa=0;
+#endif
   for (k1=0; k1 < 4; k1++)
     {
-      //printf("errf (iter=0, k1=%d) =%.16G, %.16G\n", k1, fabs(fvec[k1]), fabs(fvec[k1]/vr[k1]));
+      //printf("errf (iter=0, k1=%d) =%.16G, %.16G\n", k1, fabs(fvec[k1]), fabs((fvec[k1]-vr[k1])/vr[k1]));
+
 #ifdef ABS_ERROR 
       errfv[k1] = fabs(fvec[k1]);
-#else
-      errfv[k1] = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-#endif
       errf += errfv[k1];
+#else
+      fveca = fabs(fvec[k1]);
+      errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+      errfa += fveca;
+#endif
       xmin[k1] = x[k1];
     }
-  errfmin = errf;
+#ifndef ABS_ERROR
+  errfmin = errfa;
+#endif
   if (errf==0)
     return;
   // on average 2 iterations are sufficient...
-  for (iter = 0; iter < 8; iter++)
+  for (iter = 0; iter < NITERMAX; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -334,28 +346,53 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
+#ifndef ABS_ERROR
+      errfold = errf;
+#endif
       errf=0;
+#ifndef ABS_ERROR
+      errfa = 0.0;
+#endif
       for (k1=0; k1 < 4; k1++)
         {
-          //printf("errf (iter=%d k1=%d) =%.16G, %.16G\n", iter+1, k1, fabs(fvec[k1]), fabs(fvec[k1]/vr[k1]));
+#ifdef ABS_ERROR
           errfvold[k1] = errfv[k1];
+#endif
 #ifdef ABS_ERROR
           errfv[k1] = fabs(fvec[k1]); 
-#else
-          errfv[k1] = (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]); 
-#endif
           errf += errfv[k1];
+#else
+          fveca=fabs(fvec[k1]);
+          errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]); 
+          errfa += fveca;
+#endif
         }
+
+#ifndef ABS_ERROR
+      if (errfa < errfmin)
+        {
+          errfmin = errfa;
+          for (k1=0; k1 < 4; k1++)
+            xmin[k1]=x[k1];
+        }
+#else
       if (errf < errfmin)
         {
           errfmin = errf;
           for (k1=0; k1 < 4; k1++)
             xmin[k1]=x[k1];
         }
+#endif
       if (errf==0)
         break;
+
+#ifndef ABS_ERROR
+      // stop if total relative error increases
+      if (errf >= errfold)
+        break;
+#else
+      // stop if all absolute errors are increasing
       cc=0;
-      // stop if all absolute errors are incresing
       for (k1=0; k1 <  4; k1++)
         {
           if (errfv[k1] >= errfvold[k1])
@@ -363,6 +400,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
         }
       if (cc==4)
         break;
+#endif
     }
   *AQ=xmin[0];
   *BQ=xmin[1];
