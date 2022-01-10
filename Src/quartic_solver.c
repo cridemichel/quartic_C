@@ -378,6 +378,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
 #else
       if (errf < errfmin)
         {
+          // look for solution with smallest absolute error, since it provides more accurate roots
           errfmin = errf;
           for (k1=0; k1 < 4; k1++)
             xmin[k1]=x[k1];
