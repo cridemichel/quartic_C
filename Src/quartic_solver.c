@@ -390,7 +390,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
         break;
 
 #ifndef ABS_ERROR
-      // stop if total both relative and absolute errors have increased at least once
+      // stop if both total relative and absolute errors have increased at least once
       if (errf >= errfold)
         nincrel =1;
       if (errfa >= errfaold)
