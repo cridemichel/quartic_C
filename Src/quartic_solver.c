@@ -258,7 +258,7 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   return sum;
 }
 //#define ABS_ERROR
-#define NITERMAX 8
+#define NITERMAX 20
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
@@ -266,7 +266,8 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   int iter, k1, k2;
   double x02, errfmin, errf, x[4], dx[4], det, Jinv[4][4], fvec[4];
 #ifndef ABS_ERROR
-  double vr[4], errfold, errfa, fveca;
+  int nincabs=0, nincrel=0;     
+  double vr[4], errfold, errfa, fveca, errfaold;
 #else
   double errfvold[4], errfv[4];
   int cc;
@@ -307,7 +308,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
 #ifndef ABS_ERROR
   errfmin = errfa;
 #endif
-  if (errf==0)
+  if (errfa==0)
     return;
   // on average 2 iterations are sufficient...
   for (iter = 0; iter < NITERMAX; iter++)
@@ -347,6 +348,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
 #ifndef ABS_ERROR
+      errfaold = errfa;
       errfold = errf;
 #endif
       errf=0;
@@ -384,12 +386,16 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
             xmin[k1]=x[k1];
         }
 #endif
-      if (errf==0)
+      if (errfa==0)
         break;
 
 #ifndef ABS_ERROR
-      // stop if total relative error increases
+      // stop if total both relative and absolute errors have increased at least once
       if (errf >= errfold)
+        nincrel=1;
+      if (errfa >= errfaold)
+        nincabs=1;
+      if (nincrel==1 && nincabs==1)
         break;
 #else
       // stop if all absolute errors are increasing
