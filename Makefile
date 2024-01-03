@@ -34,5 +34,5 @@ simpletest: sources $(DRV)/simpletest.c
 	$(CC) $(CFLAGS) -o $(BIN)/simpletest $(DRV)/simpletest.c $(SRC)/quartic_solver.o $(SRC)/quartic_solver_cmplx.o -lm
 
 clean: 
-	rm -f $(SRC)/*.o $(DRV)/*.o $(BIN)/simpletest $(BIN)/accuracytest $(BIN)/timingtest $(BIN)/statanalysis $(BIN)/timingtest_sample_F
-        
+	rm -f accuracytest.out timings_sample*txt $(SRC)/*.o $(DRV)/*.o $(BIN)/simpletest $(BIN)/accuracytest $(BIN)/timingtest $(BIN)/statanalysis $(BIN)/timingtest_sample_F
+	rm -fr SAMPLE_*

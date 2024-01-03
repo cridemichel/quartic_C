@@ -257,7 +257,6 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
-//#define ABS_ERROR
 #define NITERMAX 20
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
@@ -265,49 +264,30 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
    * coefficients a,b,c,d */
   int iter, k1, k2;
   double x02, errfmin, errf, x[4], dx[4], det, Jinv[4][4], fvec[4];
-#ifndef ABS_ERROR
-  int nincabs=0, nincrel=0;     
-  double vr[4], errfold, errfa, fveca, errfaold;
-#else
-  double errfvold[4], errfv[4];
-  int cc;
-#endif
+  double vr[4], errfold, errfa, fveca;
   double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
   x[3] = *DQ;
-#ifndef ABS_ERROR
   vr[0] = d;
   vr[1] = c;
   vr[2] = b;
   vr[3] = a;
-#endif
   fvec[0] = x[1]*x[3] - d;
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
   errf=0;
-#ifndef ABS_ERROR
   errfa=0;
-#endif
   for (k1=0; k1 < 4; k1++)
     {
-      //printf("errf (iter=0, k1=%d) =%.16G, %.16G\n", k1, fabs(fvec[k1]), fabs((fvec[k1]-vr[k1])/vr[k1]));
-
-#ifdef ABS_ERROR 
-      errfv[k1] = fabs(fvec[k1]);
-      errf += errfv[k1];
-#else
       fveca = fabs(fvec[k1]);
       errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
       errfa += fveca;
-#endif
       xmin[k1] = x[k1];
     }
-#ifndef ABS_ERROR
   errfmin = errfa;
-#endif
   if (errfa==0)
     return;
   // on average 2 iterations are sufficient...
@@ -347,67 +327,27 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
-#ifndef ABS_ERROR
-      errfaold = errfa;
       errfold = errf;
-#endif
       errf=0;
-#ifndef ABS_ERROR
       errfa = 0.0;
-#endif
       for (k1=0; k1 < 4; k1++)
         {
-#ifdef ABS_ERROR
-          errfvold[k1] = errfv[k1];
-#endif
-#ifdef ABS_ERROR
-          errfv[k1] = fabs(fvec[k1]); 
-          errf += errfv[k1];
-#else
           fveca=fabs(fvec[k1]);
           errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]); 
           errfa += fveca;
-#endif
         }
 
-#ifndef ABS_ERROR
       if (errfa < errfmin)
         {
           errfmin = errfa;
           for (k1=0; k1 < 4; k1++)
             xmin[k1]=x[k1];
         }
-#else
-      if (errf < errfmin)
-        {
-          // look for solution with smallest absolute error, since it provides more accurate roots
-          errfmin = errf;
-          for (k1=0; k1 < 4; k1++)
-            xmin[k1]=x[k1];
-        }
-#endif
       if (errfa==0)
         break;
-
-#ifndef ABS_ERROR
-      // stop if both total relative and absolute errors have increased at least once
+      // stop if total relative has increased at least once but take solution with minimum absolute error
       if (errf >= errfold)
-        nincrel =1;
-      if (errfa >= errfaold)
-        nincabs = 1;
-      if (nincrel == 1 && nincabs == 1)
         break;
-#else
-      // stop if all absolute errors are increasing
-      cc=0;
-      for (k1=0; k1 <  4; k1++)
-        {
-          if (errfv[k1] >= errfvold[k1])
-            cc++;
-        }
-      if (cc==4)
-        break;
-#endif
     }
   *AQ=xmin[0];
   *BQ=xmin[1];
@@ -455,7 +395,9 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
    * the four roots will be stored in the complex array roots[] 
    *
    * */
-  complex double acx1, bcx1, ccx1, dcx1,acx,bcx,ccx,dcx,cdiskr,zx1,zx2,zxmax,zxmin, qroots[2];
+  const double Kfact = 2.0;
+  complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx,dcx,cdiskr,zx1,zx2,
+          zxmax,zxmin, qroots[2];
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
   double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2;
   int realcase[2], whichcase, k1, k, kmin, nsol;
@@ -621,7 +563,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
   // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
+  if (realcase[0]==-1 || (fabs(d2) <= Kfact*macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)

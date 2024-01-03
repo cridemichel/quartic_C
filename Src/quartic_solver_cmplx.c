@@ -390,12 +390,16 @@ double oqs_calc_err_abc_cmplx(complex double a, complex double b, complex double
   sum +=(a==0)?cabs(aq + cq):cabs(((aq + cq) - a)/a);
   return sum;
 }
+
+#define NRITMAX 20
 void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for real
    * coefficients a,b,c,d */
   int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double x02, errf, errfold, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errfa, fveca, errfmin;
+  double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -408,109 +412,18 @@ void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
-  errf=0;
+  errf=0.0;
+  errfa=0.0;
   for (k1=0; k1 < 4; k1++)
     {
-      errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      fveca = fabs(fvec[k1]);
+      errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+      errfa += fveca;
+      xmin[k1] = x[k1];
     }
-  for (iter = 0; iter < 8; iter++)
-    {
-      x02 = x[0]-x[2];
-      det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
-      if (det==0.0)
-        break;
-      Jinv[0][0] = x02;
-      Jinv[0][1] = x[3] - x[1];
-      Jinv[0][2] = x[1]*x[2] - x[0]*x[3];
-      Jinv[0][3] = -x[1]*Jinv[0][1] - x[0]*Jinv[0][2]; 
-      Jinv[1][0] = x[0]*Jinv[0][0] + Jinv[0][1];
-      Jinv[1][1] = -x[1]*Jinv[0][0];
-      Jinv[1][2] = -x[1]*Jinv[0][1];   
-      Jinv[1][3] = -x[1]*Jinv[0][2];
-      Jinv[2][0] = -Jinv[0][0];
-      Jinv[2][1] = -Jinv[0][1];
-      Jinv[2][2] = -Jinv[0][2];
-      Jinv[2][3] = Jinv[0][2]*x[2] + Jinv[0][1]*x[3];
-      Jinv[3][0] = -x[2]*Jinv[0][0] - Jinv[0][1];
-      Jinv[3][1] = Jinv[0][0]*x[3];
-      Jinv[3][2] = x[3]*Jinv[0][1];
-      Jinv[3][3] = x[3]*Jinv[0][2];
-      for (k1=0; k1 < 4; k1++)
-        {
-          dx[k1] = 0;
-          for (k2=0; k2 < 4; k2++)
-            dx[k1] += Jinv[k1][k2]*fvec[k2];
-        }
-      for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
-        {
-          x[k1] += -dx[k1]/det;
-        }
-      fvec[0] = x[1]*x[3] - d;
-      fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
-      fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
-      fvec[3] = x[0] + x[2] - a; 
-      errfold = errf;
-      errf=0;
-      for (k1=0; k1 < 4; k1++)
-        {
-          errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
-        }
-      if (errf==0)
-        break;
-      if (errf >= errfold)
-        {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
-        }
-    }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
-}
-#define NRITMAX 8
-void NRabcdCCmplx(complex double a, complex double b, complex double c, complex double d, 
-                  complex double *AQ, complex double *BQ, complex double *CQ, complex double *DQ)
-{
-  /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
-   * coefficients a,b,c,d */
-  int iter, k1, k2, itermin, ninc=0;
-  const int nincmax = 2;
-  complex double x02, xold[4], dx[4], x[4], det, delx, Jinv[4][4], fvec[4], vr[4], xv[NRITMAX+1][4];
-  double errx, errfmin, errfv[NRITMAX+1];
-
-  x[0] = *AQ;
-  x[1] = *BQ;
-  x[2] = *CQ;
-  x[3] = *DQ;
-  vr[0] = d;
-  vr[1] = c;
-  vr[2] = b;
-  vr[3] = a;
-  fvec[0] = x[1]*x[3] - d;
-  fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
-  fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
-  fvec[3] = x[0] + x[2] - a; 
-
-  errfv[0]=0;
-  for (k1=0; k1 < 4; k1++)
-    {
-      errfv[0] += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
-    }
-
-  if (errfv[0] < macheps_cmplx)
+  errfmin = errfa;
+  if (errfa==0)
     return;
-
-  errfmin = errfv[0];
-  itermin = 0;
-  for (k1=0; k1 < 4; k1++)
-    {
-      xv[0][k1] = x[k1];
-    }
   for (iter = 0; iter < NRITMAX; iter++)
     {
       x02 = x[0]-x[2];
@@ -540,14 +453,103 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
       for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      errx=0.0;
+        {
+          x[k1] += -dx[k1]/det;
+        }
+      fvec[0] = x[1]*x[3] - d;
+      fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
+      fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
+      fvec[3] = x[0] + x[2] - a; 
+      errfold = errf;
+      errf=0;
+      errfa=0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          delx = -dx[k1]/det;
-          errx += (x[k1]==0)?cabs(delx):cabs(delx/x[k1]);
-          x[k1] += delx;
+          fveca = fabs(fvec[k1]);
+          errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+          errfa += fveca;
+        }
+      if (errfa  < errfmin)
+        {
+          errfmin = errfa;
+          for (k1=0; k1 < 4; k1++)
+            xmin[k1]=x[k1];
+        }
+      if (errfa==0)
+        break;
+      if (errf >= errfold)
+        break;
+    }
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
+}
+void NRabcdCCmplx(complex double a, complex double b, complex double c, complex double d, 
+                  complex double *AQ, complex double *BQ, complex double *CQ, complex double *DQ)
+{
+  /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
+   * coefficients a,b,c,d */
+  int iter, k1, k2;
+  complex double xmin[4], x02, dx[4], x[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errf, errfold, errfa, errfmin;
+
+  x[0] = *AQ;
+  x[1] = *BQ;
+  x[2] = *CQ;
+  x[3] = *DQ;
+  vr[0] = d;
+  vr[1] = c;
+  vr[2] = b;
+  vr[3] = a;
+  fvec[0] = x[1]*x[3] - d;
+  fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
+  fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
+  fvec[3] = x[0] + x[2] - a; 
+  errf=0;
+  errfa=0;
+  for (k1=0; k1 < 4; k1++)
+    {
+      errf += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
+      errfa += cabs(fvec[k1]);
+      xmin[k1] = x[k1];
+    }
+
+  errfmin = errfa;
+  if (errfa==0)
+    return;
+
+  for (iter = 0; iter < NRITMAX; iter++)
+    {
+      x02 = x[0]-x[2];
+      det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
+      if (det==0.0)
+        break;
+      Jinv[0][0] = x02;
+      Jinv[0][1] = x[3] - x[1];
+      Jinv[0][2] = x[1]*x[2] - x[0]*x[3];
+      Jinv[0][3] = -x[1]*Jinv[0][1] - x[0]*Jinv[0][2]; 
+      Jinv[1][0] = x[0]*Jinv[0][0] + Jinv[0][1];
+      Jinv[1][1] = -x[1]*Jinv[0][0];
+      Jinv[1][2] = -x[1]*Jinv[0][1];   
+      Jinv[1][3] = -x[1]*Jinv[0][2];
+      Jinv[2][0] = -Jinv[0][0];
+      Jinv[2][1] = -Jinv[0][1];
+      Jinv[2][2] = -Jinv[0][2];
+      Jinv[2][3] = Jinv[0][2]*x[2] + Jinv[0][1]*x[3];
+      Jinv[3][0] = -x[2]*Jinv[0][0] - Jinv[0][1];
+      Jinv[3][1] = Jinv[0][0]*x[3];
+      Jinv[3][2] = x[3]*Jinv[0][1];
+      Jinv[3][3] = x[3]*Jinv[0][2];
+      for (k1=0; k1 < 4; k1++)
+        {
+          dx[k1] = 0;
+          for (k2=0; k2 < 4; k2++)
+            dx[k1] += Jinv[k1][k2]*fvec[k2];
+        }
+      for (k1=0; k1 < 4; k1++)
+        {
+          x[k1] += -dx[k1]/det;
         }
 
       fvec[0] = x[1]*x[3] - d;
@@ -555,45 +557,31 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
       fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
       fvec[3] = x[0] + x[2] - a; 
 
-      errfv[iter+1] = 0;
+      errfold = errf;
+      errf = 0.0;
+      errfa = 0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          errfv[iter+1] += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
+          errf += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
+          errfa += cabs(fvec[k1]);
         }
-      // do we need this?
-      if (isnan(errfv[iter+1]) || isinf(errfv[iter+1])) 
+      if (errfa < errfmin)
         {
-          break;
-        }
-      if (errfv[iter+1] < errfmin)
-        {
+          errfmin = errfa;
           for (k1=0; k1 < 4; k1++)
-            {
-              xv[iter+1][k1] = x[k1];
-            }
-          itermin = iter + 1;
-          errfmin = errfv[iter+1];
+            xmin[k1] = x[k1];
         }
-
-      if (errx< macheps_cmplx)
+      if (errfa==0)
         break;
-
-      if (errfv[iter+1] < macheps_cmplx)
-        break;
-
-      if (errfv[iter+1] >= errfv[iter])
-        ninc++;
-      else 
-        ninc = 0;
-
-      if (ninc == nincmax)
+      if (errf >= errfold)
         break;
     }
-  *AQ=xv[itermin][0];
-  *BQ=xv[itermin][1];
-  *CQ=xv[itermin][2];
-  *DQ=xv[itermin][3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
+
 void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])      
 {
   /* USAGE:
@@ -615,6 +603,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
   int k1, k, kmin, nsol;
   double aq, bq, cq, dq;
   double rfactsq, rfact=1.0;
+  const double Kfact = 2.0;
   if (coeff[4]==0.0)
     {
       printf("That's not a quartic!\n");
@@ -754,7 +743,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       ccx = ccxv[kmin];
     }
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
-  if (cabs(d2) <= macheps_cmplx*oqs_max3_cmplx(cabs(2.*b/3.), cabs(phi0), cabs(l1*l1))) 
+  if (cabs(d2) <= Kfact*macheps_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1))) 
     {
       d3 = d - l3*l3;
       err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);

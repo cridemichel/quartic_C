@@ -79,9 +79,9 @@ int main(int argc, char **argv)
     {
       caso = 1;
     }
-  if (caso <= 0 || caso > 24)
+  if (caso <= 0 || caso > 25)
     {
-      printf("caso must be between 1 and 20\n");
+      printf("caso must be between 1 and 25\n");
       exit(-1);
     }
   x1c=x2c=x3c=x4c=0.0;
@@ -233,8 +233,8 @@ int main(int argc, char **argv)
           print_roots("CASE 21", x1c, x2c, x3c, x4c);
           break;
         case 22:
-          x1c = 1E154;//1E102;
-          x2c = 1E152;//1E100;
+          x1c = 1E154;
+          x2c = 1E152;
           x3c = 10.0;
           x4c = 1.0;
           print_roots("CASE 22", x1c, x2c, x3c, x4c);
@@ -256,6 +256,14 @@ int main(int argc, char **argv)
           c[1] = S*S + S;
           c[0] = -S;
           printf("CASE 24\n");
+          break;
+        case 25:
+          c[4]=1.0;
+          c[3]=2.2459773428819827;
+          c[2]=-14.480985471938862;
+          c[1]=-17.678187643398402;
+          c[0]=1.0;
+          printf("CASE 25\n");
           break;
         }
     }
@@ -395,16 +403,5 @@ int main(int argc, char **argv)
     } 
   if (caso <=22)
     print_accuracy_at("HQR", csol, csolREF);
-#if 0
-  csolve_quartic_shmakov(c, csol);
-  sort_sol_opt(csol, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      printf("[SHM] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-             k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-    } 
-  if (caso <= 18)
-    print_accuracy_at("SHM", csol, csolREF);
-#endif
   exit(-1);
 }
