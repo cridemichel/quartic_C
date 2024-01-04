@@ -1,6 +1,6 @@
+TESTS/*
 Session.vim
-**/*.o
+.viminfo
 **/*.swp
 bin/*
-TESTS/*
-.viminfo
+**/*.o

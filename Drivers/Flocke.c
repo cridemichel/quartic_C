@@ -643,7 +643,7 @@ void quadraticRoots (double q1, double q0, int *nReal, complex double root[2])
   int rescale;
 
   double a0, a1;
-  double k, x, y, z;
+  double k=0.0, x, y, z;
 
   const double LPN = 1.7976931348623157E+308;   // the (L)argest (P)ositive (N)umber
   const double sqrtLPN = sqrt (LPN);      // and the square root of it

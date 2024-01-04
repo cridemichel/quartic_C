@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, time, os, math 
+import sys, time, os, math
 def del_unuseful():
     os.system('rm -f timing_???_sample?.dat')
     os.system('rm -f P_of_eps*.dat')
@@ -52,8 +52,9 @@ for a in itargs:
 ############################
 print('Performing all accuracy tests...', end='')
 sys.stdout.flush()
-for i in range(1,25):
-    os.system(EXE_AT+' '+str(i)+' >> ' + AT) 
+os.system('rm -f ' + AT)
+for i in range(1,26):
+    os.system(EXE_AT+' '+str(i)+' >> ' + AT)
 print('done!')
 ############################
 ### STATISTICAL ANALYSIS ###
@@ -61,10 +62,13 @@ print('done!')
 print('Performing all statistical tests:')
 sys.stdout.flush()
 mapst=[ 'A', 'B', 'C', 'D', 'E', 'F' ]
+os.system('rm -fr SAMPLE_[A-F]')
 for i in range(0,6):
     print('Testing sample ' + mapst[i] + ' for all algorithms...',end='')
     sys.stdout.flush()
     os.system(EXE_ST+' '+str(SAT)+' 10 '+str(i)+ ' -1 >> ' + SA)
+    os.system('mkdir SAMPLE_'+mapst[i])
+    os.system('mv -f F_of_eps_rel-*.dat SAMPLE_'+mapst[i])
     print('done!')
 print('All statistal tests done!')
 os.system('rm -f PE-???-.dat')
@@ -73,16 +77,16 @@ os.system('rm -f PE-???-.dat')
 ############################
 print('Performing all timing tests:')
 def timingtest(execname,ssample,nruns,ntrials):
-    mapn=[ 'DRY', 'ODM', 'FLO', 'STR', 'FER', 'FQS', 'HQR', 'SHM' ] 
+    mapn=[ 'DRY', 'ODM', 'FLO', 'STR', 'FER', 'FQS', 'HQR', 'SHM' ]
     for ity in range(0, 7):
         fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
-        print('Testing '+ mapn[ity]+'\t', end='') 
+        print('Testing '+ mapn[ity]+'\t', end='')
         sys.stdout.flush()
-        with open(fn,'w') as ff:
+        with open(fn,'w',encoding='utf8') as ff:
             for cc in range(1,nruns+1):
-                initime=time.time()         
-                os.system('nice -n 0 '+execname+' '+str(ity)+' '+str(ntrials) + ' >> ' + TT) 
-                endtime=time.time() 
+                initime=time.time()
+                os.system('nice -n 0 '+execname+' '+str(ity)+' '+str(ntrials) + ' >> ' + TT)
+                endtime=time.time()
                 dtime=endtime-initime
                 ff.write(str(cc)+' '+str(dtime)+'\n')
                 print('.',end='')
@@ -95,7 +99,7 @@ def timingtest(execname,ssample,nruns,ntrials):
     sumt=0
     sumsq=0
     cc=0
-    with open(fn,'r') as ff:
+    with open(fn,'r', encoding='utf8') as ff:
         lines=ff.readlines()
     for ll in lines:
         lst=ll.strip('\n').split(' ')
@@ -107,13 +111,13 @@ def timingtest(execname,ssample,nruns,ntrials):
     avgt_dry=sumt/fcc
     stdd_dry=sumsq/fcc - (sumt/fcc)*(sumt/fcc)
     oft='timings_sample'+ssample+'.txt'
-    with open(oft,'w') as ff:
+    with open(oft,'w',encoding='utf8') as ff:
         ff.write('ALGO'.rjust(4)+' '+'AVG'.rjust(12)+' '+'STDDEV'.rjust(12) + '\n')
         for ity in range(1,7):
             fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
-            with open(fn,'r') as fft:
+            with open(fn,'r',encoding='utf8') as fft:
                 lines=fft.readlines()
-            sumt=0  
+            sumt=0
             sumsq=0
             cc=0
             for ll in lines:

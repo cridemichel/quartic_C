@@ -9,10 +9,10 @@ int main(void)
   double c[5]; 
   complex double cc[5], roots[4], xc[4];
   int k;
-  xc[0] = -1+3.0*I;
-  xc[1] = 1-I;
+  xc[0] = -1.5+3.0*I;
+  xc[1] = 1.0-I;
   xc[2] = -2.5+3*I;
-  xc[3] = 1-2*I;
+  xc[3] = 1.0-2.0*I;
   cc[4] = 1.0;
   cc[3] = -(xc[0]+xc[1]+xc[2]+xc[3]);
   cc[2] = xc[0]*xc[1] + (xc[0]+xc[1])*(xc[2]+xc[3]) + xc[2]*xc[3]; 

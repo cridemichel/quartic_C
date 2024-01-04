@@ -27,6 +27,22 @@ double oqs_max3_cmplx(double a, double b, double c)
   t = oqs_max2_cmplx(a,b);
   return oqs_max2_cmplx(t,c);
 }
+
+double oqs_min2_cmplx(double a, double b)
+{
+  if (a <= b)
+    return a;
+  else
+    return b;
+}
+
+double oqs_min3_cmplx(double a, double b, double c)
+{
+  double t;
+  t = oqs_min2_cmplx(a,b);
+  return oqs_min2_cmplx(t,c);
+}
+
 void oqs_solve_cubic_analytic_depressed_handle_inf_cmplx(complex double b, complex double c, complex double *sol)
 {
   /* find analytically the dominant root of a depressed cubic x^3+b*x+c 
@@ -241,7 +257,7 @@ void oqs_solve_quadratic_cmplx(double a, double b, complex double roots[2])
     }   
 }
 
-void oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, complex double d, complex double *phi0, int scaled)
+complex double oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, complex double d, complex double *phi0, int scaled)
 {
   /* find phi0 as the dominant root of the depressed and shifted cubic 
    * in eq. (79) (see also the discussion in sec. 2.2 of the manuscript) */
@@ -358,6 +374,7 @@ void oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, c
         }
     }
   *phi0 = x;
+  return f;
 }
 double oqs_calc_err_ldlt_cmplx(complex double b, complex double c, complex double d, complex double d2, 
                                complex double l1, complex double l2, complex double l3)
@@ -390,12 +407,16 @@ double oqs_calc_err_abc_cmplx(complex double a, complex double b, complex double
   sum +=(a==0)?cabs(aq + cq):cabs(((aq + cq) - a)/a);
   return sum;
 }
+
+#define NRITMAX 20
 void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for real
    * coefficients a,b,c,d */
   int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double x02, errf, errfold, x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errfa, fveca, errfmin;
+  double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -408,12 +429,19 @@ void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double
   fvec[1] = x[1]*x[2] + x[0]*x[3] - c;
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
-  errf=0;
+  errf=0.0;
+  errfa=0.0;
   for (k1=0; k1 < 4; k1++)
     {
-      errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      fveca = fabs(fvec[k1]);
+      errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+      errfa += fveca;
+      xmin[k1] = x[k1];
     }
-  for (iter = 0; iter < 8; iter++)
+  errfmin = errfa;
+  if (errfa==0)
+    return;
+  for (iter = 0; iter < NRITMAX; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -442,9 +470,6 @@ void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
       for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
         {
           x[k1] += -dx[k1]/det;
         }
@@ -454,23 +479,28 @@ void oqs_NRabcd_cmplx(double a, double b, double c, double d, double *AQ, double
       fvec[3] = x[0] + x[2] - a; 
       errfold = errf;
       errf=0;
+      errfa=0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+          fveca = fabs(fvec[k1]);
+          errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+          errfa += fveca;
         }
-      if (errf==0)
+      if (errfa  < errfmin)
+        {
+          errfmin = errfa;
+          for (k1=0; k1 < 4; k1++)
+            xmin[k1]=x[k1];
+        }
+      if (errfa==0)
         break;
       if (errf >= errfold)
-        {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
-        }
+        break;
     }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
 void NRabcdCCmplx(complex double a, complex double b, complex double c, complex double d, 
                   complex double *AQ, complex double *BQ, complex double *CQ, complex double *DQ)
@@ -478,8 +508,9 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
   int iter, k1, k2;
-  complex double x02, xold[4], dx[4], x[4], det, Jinv[4][4], fvec[4], vr[4];
-  double errf, errfold;
+  complex double xmin[4], x02, dx[4], x[4], det, Jinv[4][4], fvec[4], vr[4];
+  double errf, errfold, errfa, errfmin;
+
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -493,15 +524,19 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
   errf=0;
+  errfa=0;
   for (k1=0; k1 < 4; k1++)
     {
       errf += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
+      errfa += cabs(fvec[k1]);
+      xmin[k1] = x[k1];
     }
 
-  if (errf==0)
+  errfmin = errfa;
+  if (errfa==0)
     return;
 
-  for (iter = 0; iter < 8; iter++)
+  for (iter = 0; iter < NRITMAX; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -530,9 +565,6 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
       for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
         {
           x[k1] += -dx[k1]/det;
         }
@@ -543,25 +575,30 @@ void NRabcdCCmplx(complex double a, complex double b, complex double c, complex 
       fvec[3] = x[0] + x[2] - a; 
 
       errfold = errf;
-      errf=0;
+      errf = 0.0;
+      errfa = 0.0;
       for (k1=0; k1 < 4; k1++)
         {
           errf += (vr[k1]==0)?cabs(fvec[k1]):cabs(fvec[k1]/vr[k1]);
+          errfa += cabs(fvec[k1]);
         }
-      if (errf==0)
+      if (errfa < errfmin)
+        {
+          errfmin = errfa;
+          for (k1=0; k1 < 4; k1++)
+            xmin[k1] = x[k1];
+        }
+      if (errfa==0)
         break;
       if (errf >= errfold)
-        {
-          for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
-        }
+        break;
     }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
+
 void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])      
 {
   /* USAGE:
@@ -577,7 +614,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
    * */
   complex double acx1, bcx1, ccx1, dcx1,acx,bcx,cdiskr,zx1,zx2,zxmax,zxmin, ccx, dcx;
   complex double l2m[12], d2m[12], bl311, dml3l3; 
-  complex double a,b,c,d,phi0,d2,d3,l1,l2,l3,acxv[3],ccxv[3],gamma,del2,qroots[2];
+  complex double a,b,c,d,phi0,d2,d3,l1,l2,l3,acxv[3],ccxv[3],gamma,del2,qroots[2], detM;
   double res[12], resmin, err0, err1;
   double errmin, errv[3];
   int k1, k, kmin, nsol;
@@ -592,7 +629,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
   b=coeff[2]/coeff[4];
   c=coeff[1]/coeff[4];
   d=coeff[0]/coeff[4];
-  oqs_calc_phi0_cmplx(a,b,c,d,&phi0,0);
+  detM = oqs_calc_phi0_cmplx(a,b,c,d,&phi0,0);
   // simple polynomial rescaling
   if (isnan(creal(phi0))||isinf(creal(phi0))||
       isnan(cimag(phi0))||isinf(cimag(phi0)))
@@ -603,7 +640,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       b /= rfactsq;
       c /= rfactsq*rfact;
       d /= rfactsq*rfactsq;
-      oqs_calc_phi0_cmplx(a,b,c,d,&phi0, 1);
+      detM = oqs_calc_phi0_cmplx(a,b,c,d,&phi0, 1);
     }
 
   l1=a/2;        /* eq. (16) */                                        
@@ -722,7 +759,8 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       ccx = ccxv[kmin];
     }
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
-  if (cabs(d2) <= macheps_cmplx*oqs_max3_cmplx(cabs(2.*b/3.), cabs(phi0), cabs(l1*l1))) 
+  if (cabs(d2) <= macheps_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)) ||
+      cabs(detM) > macheps_cmplx*oqs_min3_cmplx(cabs(d2*d),cabs(d2*d2*l2*l2),cabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);

@@ -136,7 +136,7 @@ int fqsits=0;
 void backward_optimizer(double *alpha, double *beta, double *gamma, double *delta, double a, double b, double c, double d, int *kchosen)
 {
   double e1[2], e2[2], e3[2], e4[2];
-  double U23[2], U33[2], L43[2], U44[2], x1[2], x2[2], x3[2], x4[2], y1[2], y2[2], y3[2], y4[2];
+  double U23[2], U33[2], L43[2], U44[2], x1[2]={0,0}, x2[2], x3[2], x4[2], y1[2], y2[2], y3[2], y4[2];
   double eps[2][NBUF];
   const int MAXITS=17; 
   int ignore[2];
@@ -257,7 +257,7 @@ int error_handler1(double a, double b, double c, double d, complex double solqua
 }
 int error_handler2(double a, double b , double c, double d, int *numsol, complex double solqua[4])
 {
-  double cq[3], x1[2], x2[2], eps1, eps2;
+  double cq[3], x1[2]={0,0}, x2[2], eps1, eps2;
   int nsq, k;
   cq[2] = 1.0;
   cq[1] = a*0.5;

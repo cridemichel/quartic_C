@@ -28,6 +28,21 @@ double oqs_max3(double a, double b, double c)
   return oqs_max2(t,c);
 }
 
+double oqs_min2(double a, double b)
+{
+  if (a <= b)
+    return a;
+  else
+    return b;
+}
+
+double oqs_min3(double a, double b, double c)
+{
+  double t;
+  t = oqs_min2(a,b);
+  return oqs_min2(t,c);
+}
+
 void oqs_solve_cubic_analytic_depressed_handle_inf(double b, double c, double *sol)
 {
   /* find analytically the dominant root of a depressed cubic x^3+b*x+c 
@@ -118,7 +133,7 @@ void oqs_solve_cubic_analytic_depressed(double b, double c, double *sol)
       *sol = A+B; /* this is always largest root even if A=B */
     }
 }
-void oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int scaled)
+double oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int scaled)
 {
   /* find phi0 as the dominant root of the depressed and shifted cubic 
    * in eq. (79) (see also the discussion in sec. 2.2 of the manuscript) */
@@ -217,6 +232,7 @@ void oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int sca
         }
     }
   *phi0 = x;
+  return f;
 }
 double oqs_calc_err_ldlt(double b, double c, double d, double d2, double l1, double l2, double l3)
 {
@@ -257,12 +273,15 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
+#define NITERMAX 20
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
   /* Newton-Raphson described in sec. 2.3 of the manuscript for complex
    * coefficients a,b,c,d */
   int iter, k1, k2;
-  double x02, errf, errfold, xold[4], x[4], dx[4], det, Jinv[4][4], fvec[4], vr[4];
+  double x02, errfmin, errf, x[4], dx[4], det, Jinv[4][4], fvec[4];
+  double vr[4], errfold, errfa, fveca;
+  double xmin[4];
   x[0] = *AQ;
   x[1] = *BQ;
   x[2] = *CQ;
@@ -276,11 +295,19 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   fvec[2] = x[1] + x[0]*x[2] + x[3] - b;
   fvec[3] = x[0] + x[2] - a; 
   errf=0;
+  errfa=0;
   for (k1=0; k1 < 4; k1++)
     {
-      errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+      fveca = fabs(fvec[k1]);
+      errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]);
+      errfa += fveca;
+      xmin[k1] = x[k1];
     }
-  for (iter = 0; iter < 8; iter++)
+  errfmin = errfa;
+  if (errfa==0)
+    return;
+  // on average 2 iterations are sufficient...
+  for (iter = 0; iter < NITERMAX; iter++)
     {
       x02 = x[0]-x[2];
       det = x[1]*x[1] + x[1]*(-x[2]*x02 - 2.0*x[3]) + x[3]*(x[0]*x02 + x[3]);
@@ -309,9 +336,6 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
             dx[k1] += Jinv[k1][k2]*fvec[k2];
         }
       for (k1=0; k1 < 4; k1++)
-        xold[k1] = x[k1];
-
-      for (k1=0; k1 < 4; k1++)
         {
           x[k1] += -dx[k1]/det;
         }
@@ -321,23 +345,30 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
       fvec[3] = x[0] + x[2] - a; 
       errfold = errf;
       errf=0;
+      errfa = 0.0;
       for (k1=0; k1 < 4; k1++)
         {
-          errf += (vr[k1]==0)?fabs(fvec[k1]):fabs(fvec[k1]/vr[k1]);
+          fveca=fabs(fvec[k1]);
+          errf += (vr[k1]==0)?fveca:fabs(fveca/vr[k1]); 
+          errfa += fveca;
         }
-      if (errf==0)
-        break;
-      if (errf >= errfold)
+
+      if (errfa < errfmin)
         {
+          errfmin = errfa;
           for (k1=0; k1 < 4; k1++)
-            x[k1] = xold[k1];
-          break;
+            xmin[k1]=x[k1];
         }
+      if (errfa==0)
+        break;
+      // stop if total relative has increased at least once but take solution with minimum absolute error
+      if (errf >= errfold)
+        break;
     }
-  *AQ=x[0];
-  *BQ=x[1];
-  *CQ=x[2];
-  *DQ=x[3];
+  *AQ=xmin[0];
+  *BQ=xmin[1];
+  *CQ=xmin[2];
+  *DQ=xmin[3];
 }
 void oqs_solve_quadratic(double a, double b, complex double roots[2])
 { 
@@ -380,9 +411,10 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
    * the four roots will be stored in the complex array roots[] 
    *
    * */
-  complex double acx1, bcx1, ccx1, dcx1,acx,bcx,ccx,dcx,cdiskr,zx1,zx2,zxmax,zxmin, qroots[2];
+  complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx,dcx,cdiskr,zx1,zx2,
+          zxmax,zxmin, qroots[2];
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
-  double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2;
+  double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2,detM;
   int realcase[2], whichcase, k1, k, kmin, nsol;
   double rfactsq, rfact=1.0;
 
@@ -395,7 +427,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   b=coeff[2]/coeff[4];
   c=coeff[1]/coeff[4];
   d=coeff[0]/coeff[4];
-  oqs_calc_phi0(a,b,c,d,&phi0, 0);
+  detM=oqs_calc_phi0(a,b,c,d,&phi0, 0);
 
   // simple polynomial rescaling
   if (isnan(phi0)||isinf(phi0))
@@ -406,7 +438,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       b /= rfactsq;
       c /= rfactsq*rfact;
       d /= rfactsq*rfactsq;
-      oqs_calc_phi0(a,b,c,d,&phi0, 1);
+      detM=oqs_calc_phi0(a,b,c,d,&phi0, 1);
     }
   l1=a/2;          /* eq. (16) */                                        
   l3=b/6+phi0/2;   /* eq. (18) */                                
@@ -544,9 +576,21 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   else 
     realcase[0] = -1; // d2=0
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
+  // CRITICAL FIX 04/01/2024: 
+  // if d2 == 0 then d3 != 0 and one has to consider 
+  // the case 3 (d2 = 0) to find quartic roots (see pags. 9-10 of my ACM 2020).
+  // To verify that d2==0 one can use Eq. (2) in my ACM remark, 
+  // but in addition one can also check if d3 != 0 by using Eq. (15). 
+  // To do this, we note that according to Eq.(15) 
+  // d3 = det(M)/d2 = d - d2*l2^2 + l3^2, i.e.
+  // det(M) = d2*d - d2^2*l2^2 + d2*l3^2
+  // hence to consider d3 != 0 we require that
+  // d3 > meps*min{abs(d2*d),abs(d2*d2*l2*l2),abs(l3*l3*d2)     
+  
   // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
+  if (realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
+      || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)
