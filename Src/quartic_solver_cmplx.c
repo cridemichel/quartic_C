@@ -27,6 +27,22 @@ double oqs_max3_cmplx(double a, double b, double c)
   t = oqs_max2_cmplx(a,b);
   return oqs_max2_cmplx(t,c);
 }
+
+double oqs_min2_cmplx(double a, double b)
+{
+  if (a <= b)
+    return a;
+  else
+    return b;
+}
+
+double oqs_min3_cmplx(double a, double b, double c)
+{
+  double t;
+  t = oqs_min2_cmplx(a,b);
+  return oqs_min2_cmplx(t,c);
+}
+
 void oqs_solve_cubic_analytic_depressed_handle_inf_cmplx(complex double b, complex double c, complex double *sol)
 {
   /* find analytically the dominant root of a depressed cubic x^3+b*x+c 
@@ -241,7 +257,7 @@ void oqs_solve_quadratic_cmplx(double a, double b, complex double roots[2])
     }   
 }
 
-void oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, complex double d, complex double *phi0, int scaled)
+complex double oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, complex double d, complex double *phi0, int scaled)
 {
   /* find phi0 as the dominant root of the depressed and shifted cubic 
    * in eq. (79) (see also the discussion in sec. 2.2 of the manuscript) */
@@ -358,6 +374,7 @@ void oqs_calc_phi0_cmplx(complex double a, complex double b, complex double c, c
         }
     }
   *phi0 = x;
+  return f;
 }
 double oqs_calc_err_ldlt_cmplx(complex double b, complex double c, complex double d, complex double d2, 
                                complex double l1, complex double l2, complex double l3)
@@ -597,13 +614,12 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
    * */
   complex double acx1, bcx1, ccx1, dcx1,acx,bcx,cdiskr,zx1,zx2,zxmax,zxmin, ccx, dcx;
   complex double l2m[12], d2m[12], bl311, dml3l3; 
-  complex double a,b,c,d,phi0,d2,d3,l1,l2,l3,acxv[3],ccxv[3],gamma,del2,qroots[2];
+  complex double a,b,c,d,phi0,d2,d3,l1,l2,l3,acxv[3],ccxv[3],gamma,del2,qroots[2], detM;
   double res[12], resmin, err0, err1;
   double errmin, errv[3];
   int k1, k, kmin, nsol;
   double aq, bq, cq, dq;
   double rfactsq, rfact=1.0;
-  const double Kfact = 2.0;
   if (coeff[4]==0.0)
     {
       printf("That's not a quartic!\n");
@@ -613,7 +629,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
   b=coeff[2]/coeff[4];
   c=coeff[1]/coeff[4];
   d=coeff[0]/coeff[4];
-  oqs_calc_phi0_cmplx(a,b,c,d,&phi0,0);
+  detM = oqs_calc_phi0_cmplx(a,b,c,d,&phi0,0);
   // simple polynomial rescaling
   if (isnan(creal(phi0))||isinf(creal(phi0))||
       isnan(cimag(phi0))||isinf(cimag(phi0)))
@@ -624,7 +640,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       b /= rfactsq;
       c /= rfactsq*rfact;
       d /= rfactsq*rfactsq;
-      oqs_calc_phi0_cmplx(a,b,c,d,&phi0, 1);
+      detM = oqs_calc_phi0_cmplx(a,b,c,d,&phi0, 1);
     }
 
   l1=a/2;        /* eq. (16) */                                        
@@ -743,7 +759,8 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       ccx = ccxv[kmin];
     }
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
-  if (cabs(d2) <= Kfact*macheps_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1))) 
+  if (cabs(d2) <= macheps_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)) ||
+      cabs(detM) > macheps_cmplx*oqs_min3_cmplx(cabs(d2*d),cabs(d2*d2*l2*l2),cabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);
