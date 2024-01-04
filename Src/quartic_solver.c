@@ -43,7 +43,6 @@ double oqs_min3(double a, double b, double c)
   return oqs_min2(t,c);
 }
 
-
 void oqs_solve_cubic_analytic_depressed_handle_inf(double b, double c, double *sol)
 {
   /* find analytically the dominant root of a depressed cubic x^3+b*x+c 
