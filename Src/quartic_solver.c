@@ -279,6 +279,24 @@ double oqs_calc_err_abc(double a, double b, double c, double aq, double bq, doub
   sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
   return sum;
 }
+double oqs_calc_err_abc_opt1(double a, double b, double c, double aq, double bq, double cq, double dq, double bqcq)
+{
+  /* Eqs. (48)-(51) in the manuscript */
+  double sum;
+  sum = (c==0)?fabs(bqcq + aq*dq):fabs(((bqcq + aq*dq) - c)/c);
+  sum +=(b==0)?fabs(bq + aq*cq + dq):fabs(((bq + aq*cq + dq) - b)/b);
+  sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
+  return sum;
+}
+double oqs_calc_err_abc_opt2(double a, double b, double c, double aq, double bq, double cq, double dq, double aqdq)
+{
+  /* Eqs. (48)-(51) in the manuscript */
+  double sum;
+  sum = (c==0)?fabs(bq*cq + aqdq):fabs(((bq*cq + aqdq) - c)/c);
+  sum +=(b==0)?fabs(bq + aq*cq + dq):fabs(((bq + aq*cq + dq) - b)/b);
+  sum +=(a==0)?fabs(aq + cq):fabs(((aq + cq) - a)/a);
+  return sum;
+}
 #define NITERMAX 20
 void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, double *CQ, double *DQ)
 {
@@ -496,6 +514,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       l2 = l2m[kmin];
     }
   whichcase = 0; 
+  double bqcq, aqdq;
   if (d2 < 0.0) 
     {
       /* Case I eqs. (37)-(40) */
@@ -512,20 +531,21 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       if (fabs(aq) < fabs(cq))
         {
           nsol=0;
+          bqcq=bq*cq;
           if (dq !=0)
             {
               aqv[nsol] = (c - bq*cq)/dq;    /* see eqs. (47) */
-              errv[nsol]=oqs_calc_err_abc(a, b, c, aqv[nsol], bq, cq, dq);
+              errv[nsol]=oqs_calc_err_abc_opt1(a, b, c, aqv[nsol], bq, cq, dq, bqcq);
               nsol++;
             }
           if (cq != 0) 
             {
               aqv[nsol] = (b - dq - bq)/cq;  /* see eqs. (47) */
-              errv[nsol] = oqs_calc_err_abc(a, b, c, aqv[nsol], bq, cq, dq);
+              errv[nsol] = oqs_calc_err_abc_opt1(a, b, c, aqv[nsol], bq, cq, dq, bqcq);
               nsol++;
             }
           aqv[nsol] = a - cq;                /* see eqs. (47) */
-          errv[nsol] = oqs_calc_err_abc(a, b, c, aqv[nsol], bq, cq, dq);
+          errv[nsol] = oqs_calc_err_abc_opt1(a, b, c, aqv[nsol], bq, cq, dq, bqcq);
           nsol++;
           /* we select the value of aq (i.e. alpha1 in the manuscript) which minimizes errors */
           for (k=0; k < nsol; k++)
@@ -541,20 +561,21 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       else 
         {
           nsol = 0;
+          aqdq = aq*dq;
           if (bq != 0)
             { 
               cqv[nsol] = (c - aq*dq)/bq;              /* see eqs. (53) */
-              errv[nsol] = oqs_calc_err_abc(a, b, c, aq, bq, cqv[nsol], dq);
+              errv[nsol] = oqs_calc_err_abc_opt2(a, b, c, aq, bq, cqv[nsol], dq, aqdq);
               nsol++;
             }
           if (aq != 0)
             {
               cqv[nsol] = (b - bq - dq)/aq;            /* see eqs. (53) */
-              errv[nsol] = oqs_calc_err_abc(a, b, c, aq, bq, cqv[nsol], dq);
+              errv[nsol] = oqs_calc_err_abc_opt2(a, b, c, aq, bq, cqv[nsol], dq, aqdq);
               nsol++;
             }
           cqv[nsol] = a - aq;                          /* see eqs. (53) */
-          errv[nsol] = oqs_calc_err_abc(a, b, c, aq, bq, cqv[nsol], dq);
+          errv[nsol] = oqs_calc_err_abc_opt2(a, b, c, aq, bq, cqv[nsol], dq, aqdq);
           nsol++;   
           /* we select the value of cq (i.e. alpha2 in the manuscript) which minimizes errors */
           for (k=0; k < nsol; k++)
