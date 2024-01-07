@@ -257,8 +257,7 @@ double oqs_calc_err_abcd_cmplx(double a, double b, double c, double d,
 double oqs_calc_err_d(double errmin, double d, double bq, double dq)
 {
   /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
-  errmin += (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d);
-  return errmin;
+  return (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d)+errmin;
 }
 double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, double bq, double cq, double dq)
 {
@@ -422,7 +421,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
   double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2,detM;
   int realcase[2], whichcase, k1, k, kmin, nsol;
-  double rfactsq, rfact=1.0;
+  double rfactsq, rfact=1.0, sqrtd3;
 
   if (coeff[4]==0.0)
     {
@@ -606,10 +605,11 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       if (d3 <= 0)
         {
           realcase[1] = 1;
+          sqrtd3 = sqrt(-d3);
           aq1 = l1;   
-          bq1 = l3 + sqrt(-d3);
+          bq1 = l3 + sqrtd3;
           cq1 = l1;
-          dq1 = l3 - sqrt(-d3);
+          dq1 = l3 - sqrtd3;
           if(fabs(dq1) < fabs(bq1))  
             dq1=d/bq1;                                        
           else if(fabs(dq1) > fabs(bq1))
