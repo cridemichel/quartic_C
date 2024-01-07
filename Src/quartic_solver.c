@@ -254,6 +254,12 @@ double oqs_calc_err_abcd_cmplx(double a, double b, double c, double d,
   sum +=(a==0)?cabs(aq + cq):cabs(((aq + cq) - a)/a);
   return sum;
 }
+double oqs_calc_err_d(double errmin, double d, double bq, double dq)
+{
+  /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
+  errmin += (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d);
+  return errmin;
+}
 double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, double bq, double cq, double dq)
 {
   /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
@@ -594,7 +600,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)
-        err0 = oqs_calc_err_abcd(a, b, c, d, aq, bq, cq, dq);
+        err0 = oqs_calc_err_d(errmin, d, bq, dq);
       else if (realcase[0]==0)
         err0 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx, bcx, ccx, dcx);
       if (d3 <= 0)
