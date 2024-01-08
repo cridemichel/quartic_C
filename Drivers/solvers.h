@@ -1,4 +1,5 @@
 extern void oqs_quartic_solver(double coeff[5], complex double roots[4]);      
+extern void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4]);
 extern void oqs_quartic_solver_dl(long double coeff[5], complex long double roots[4]); 
 extern void csolve_quartic_abramovitz_cmplx(double *coeff, complex double sol[4]);
 extern void fast_quartic_solver(double coeff[5], complex double solqua[4]);

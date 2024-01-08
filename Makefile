@@ -6,7 +6,7 @@ export DRV = $(PERC)/Drivers
 export OF = -O3
 export CFLAGS=-Wall -Wextra
 
-default: timingtest timingtest_sample_F accuracytest statanalysis simpletest 
+default: timingtest timingtest_sample_F accuracytest statanalysis simpletest timingtest_sample_F_cmplx
 
 COMOBJ=$(DRV)/Abramowitz.o $(DRV)/Flocke.o $(DRV)/NumRecipeHQRL.o $(DRV)/StrobachLDLT.o $(DRV)/common.o $(DRV)/FastQuarticSolver.o $(DRV)/NumRecipeHQR.o $(DRV)/Shmakov.o 
 
@@ -26,6 +26,9 @@ timingtest: common $(DRV)/timingtest.c
 
 timingtest_sample_F: common $(DRV)/timingtest_sample_F.c 
 	$(CC) $(CFLAGS) $(OF) -o $(BIN)/timingtest_sample_F $(DRV)/timingtest_sample_F.c $(COMOBJ) $(SRC)/quartic_solver.o -lm
+
+timingtest_sample_F_cmplx: common $(DRV)/timingtest_sample_F_cmplx.c 
+	$(CC) $(CFLAGS) $(OF) -o $(BIN)/timingtest_sample_F_cmplx $(DRV)/timingtest_sample_F_cmplx.c $(COMOBJ) $(SRC)/quartic_solver_cmplx.o -lm
 
 statanalysis: common $(DRV)/statanalysis.c
 	$(CC) $(CFLAGS) $(OF) -o $(BIN)/statanalysis $(DRV)/statanalysis.c $(COMOBJ) $(SRC)/quartic_solver.o -lm

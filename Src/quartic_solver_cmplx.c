@@ -14,7 +14,7 @@
 const double cubic_rescal_fact_cmplx = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact_cmplx = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps_cmplx =2.2204460492503131E-16; // = DBL_EPSILON
-const int oqs_check_always_d20_cmplx = 1;
+int oqs_check_always_d20_cmplx = 1;
 double oqs_max2_cmplx(double a, double b)
 {
   if (a >= b)
@@ -769,8 +769,8 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       cabs(detM) > macheps_cmplx*oqs_min3_cmplx(cabs(d2*d),cabs(d2*d2*l2*l2),cabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
-      err0 = oqs_calc_err_d_ccmplx(errmin, d, bcx, dcx);
       acx1 = l1;  
+      err0 = oqs_calc_err_d_ccmplx(errmin, d, bcx, dcx);
       bcx1 = l3 + csqrt(-d3);
       ccx1 = l1;
       dcx1 = l3 - csqrt(-d3);
@@ -779,7 +779,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
         dcx1=d/bcx1;                                        
       else if(cabs(dcx1) > cabs(bcx1))
         bcx1=d/dcx1;                                       
-      err1 = oqs_calc_err_d_ccmplx(errmin, d, bcx1, dcx1);
+      err1 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx1, bcx1, ccx1, dcx1);
       if (d2==0 || err1 < err0)
         {
           acx = acx1;

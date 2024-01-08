@@ -14,7 +14,7 @@
 const double cubic_rescal_fact = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps = 2.2204460492503131E-16; // DBL_EPSILON
-const int oqs_check_always_d20 = 1;
+int oqs_check_always_d20 = 1;
 double oqs_max2(double a, double b)
 {
   if (a >= b)
