@@ -595,8 +595,10 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   
   // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
-      || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
+  
+  if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
+  //if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
+    //  || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)

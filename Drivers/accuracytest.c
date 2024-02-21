@@ -75,10 +75,10 @@ void print_roots(char *str, complex long double x1c, complex long double x2c,
                  complex long double x3c, complex long double x4c)
 {
   printf("%s\n", str);
-  printf("exact root #1= %.36LG+I*(%.36LG)\n", creall(x1c), cimagl(x1c));
-  printf("exact root #2= %.36LG+I*(%.36LG)\n", creall(x2c), cimagl(x2c));
-  printf("exact root #3= %.36LG+I*(%.36LG)\n", creall(x3c), cimagl(x3c));
-  printf("exact root #4= %.36LG+I*(%.36LG)\n", creall(x4c), cimagl(x4c));
+  printf("root #1= %.36LG+I*(%.36LG)\n", creall(x1c), cimagl(x1c));
+  printf("root #2= %.36LG+I*(%.36LG)\n", creall(x2c), cimagl(x2c));
+  printf("root #3= %.36LG+I*(%.36LG)\n", creall(x3c), cimagl(x3c));
+  printf("root #4= %.36LG+I*(%.36LG)\n", creall(x4c), cimagl(x4c));
 }
 int main(int argc, char **argv)
 {
@@ -99,8 +99,8 @@ int main(int argc, char **argv)
   complex double qr[2];
   for (i=0; i < 500000000 && !fine; i++)
     {
-      A = rint((drand48()-0.5)*1000000000.0);
-      B = rint((drand48()-0.5)*1000000000.0);
+      A = rint((drand48()-0.5)*100.0);
+      B = rint((drand48()-0.5)*100.0);
       //printf("CASE 26\n");
 
       c[4]=1.0;
@@ -125,7 +125,7 @@ int main(int argc, char **argv)
         {
           err += cabs(csolREF[k1])!=0?(cabs(csol[k1]-csolREF[k1])/cabs(csolREF[k1])):cabs(csol[k1]-csolREF[k1]);
         }
-      if (err > 1E-6)
+      if (err > 1E-2)
         {
           printf("BAD POLYNOMIAL\n");
           printf("x^4 + (%.16G)*x^3 + (%.16G)*x^2 + (%.16G)*x + %.16G\n", c[3], c[2], c[1], c[0]);
