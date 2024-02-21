@@ -79,7 +79,7 @@ int main(int argc, char **argv)
     {
       caso = 1;
     }
-  if (caso <= 0 || caso > 25)
+  if (caso <= 0 || caso > 26)
     {
       printf("caso must be between 1 and 25\n");
       exit(-1);
@@ -264,6 +264,14 @@ int main(int argc, char **argv)
           c[1]=-17.678187643398402;
           c[0]=1.0;
           printf("CASE 25\n");
+          break;
+        case 26:
+          c[4]=-32906.0;
+          c[3]=0.0;
+          c[2]=-15252.0;
+          c[1]=0.0;
+          c[0]=17654.0;
+          printf("CASE 26\n");
           break;
         }
     }
