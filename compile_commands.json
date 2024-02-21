@@ -1,0 +1,296 @@
+[
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Src",
+        "command": "/usr/local/opt/llvm/bin//clang -O3 -Wall -Wextra -c quartic_solver_cmplx.c",
+        "file": "/Users/demichel/WORK/quartic_C/Src/quartic_solver_cmplx.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-O3",
+            "-Wall",
+            "-Wextra",
+            "-c",
+            "quartic_solver_cmplx.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Src",
+        "command": "/usr/local/opt/llvm/bin//clang -O3 -Wall -Wextra -c quartic_solver.c",
+        "file": "/Users/demichel/WORK/quartic_C/Src/quartic_solver.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-O3",
+            "-Wall",
+            "-Wextra",
+            "-c",
+            "quartic_solver.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c Abramowitz.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "Abramowitz.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c Flocke.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/Flocke.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "Flocke.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c NumRecipeHQRL.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "NumRecipeHQRL.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c StrobachLDLT.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "StrobachLDLT.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c common.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/common.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "common.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c FastQuarticSolver.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "FastQuarticSolver.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c NumRecipeHQR.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "NumRecipeHQR.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C/Drivers",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 -c Shmakov.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.c",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "-c",
+            "Shmakov.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver.o -o /Users/demichel/WORK/quartic_C/bin/timingtest /Users/demichel/WORK/quartic_C/Drivers/timingtest.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/timingtest.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/timingtest",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/timingtest",
+            "/Users/demichel/WORK/quartic_C/Drivers/timingtest.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver.o -o /Users/demichel/WORK/quartic_C/bin/timingtest_sample_F /Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/timingtest_sample_F",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/timingtest_sample_F",
+            "/Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver.o -o /Users/demichel/WORK/quartic_C/bin/accuracytest /Users/demichel/WORK/quartic_C/Drivers/accuracytest.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/accuracytest.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/accuracytest",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/accuracytest",
+            "/Users/demichel/WORK/quartic_C/Drivers/accuracytest.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver.o -o /Users/demichel/WORK/quartic_C/bin/statanalysis /Users/demichel/WORK/quartic_C/Drivers/statanalysis.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/statanalysis.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/statanalysis",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/statanalysis",
+            "/Users/demichel/WORK/quartic_C/Drivers/statanalysis.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra /Users/demichel/WORK/quartic_C/Src/quartic_solver.o /Users/demichel/WORK/quartic_C/Src/quartic_solver_cmplx.o -o /Users/demichel/WORK/quartic_C/bin/simpletest /Users/demichel/WORK/quartic_C/Drivers/simpletest.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/simpletest.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/simpletest",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver_cmplx.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/simpletest",
+            "/Users/demichel/WORK/quartic_C/Drivers/simpletest.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -c -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver_cmplx.o -o /Users/demichel/WORK/quartic_C/bin/timingtest_sample_F_cmplx /Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F_cmplx.c",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F_cmplx.c",
+        "output": "/Users/demichel/WORK/quartic_C/bin/timingtest_sample_F_cmplx",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-c",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver_cmplx.o",
+            "-o",
+            "/Users/demichel/WORK/quartic_C/bin/timingtest_sample_F_cmplx",
+            "/Users/demichel/WORK/quartic_C/Drivers/timingtest_sample_F_cmplx.c"
+        ]
+    },
+    {
+        "directory": "/Users/demichel/WORK/quartic_C",
+        "command": "/usr/local/opt/llvm/bin//clang -Wall -Wextra -O3 /Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o /Users/demichel/WORK/quartic_C/Drivers/Flocke.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o /Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o /Users/demichel/WORK/quartic_C/Drivers/common.o /Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o /Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o /Users/demichel/WORK/quartic_C/Drivers/Shmakov.o /Users/demichel/WORK/quartic_C/Src/quartic_solver.o -c /Users/demichel/WORK/quartic_C/Drivers/solvers.h",
+        "file": "/Users/demichel/WORK/quartic_C/Drivers/solvers.h",
+        "arguments": [
+            "/usr/local/opt/llvm/bin//clang",
+            "-Wall",
+            "-Wextra",
+            "-O3",
+            "/Users/demichel/WORK/quartic_C/Drivers/Abramowitz.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Flocke.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQRL.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/StrobachLDLT.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/common.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/FastQuarticSolver.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/NumRecipeHQR.o",
+            "/Users/demichel/WORK/quartic_C/Drivers/Shmakov.o",
+            "/Users/demichel/WORK/quartic_C/Src/quartic_solver.o",
+            "-c",
+            "/Users/demichel/WORK/quartic_C/Drivers/solvers.h"
+        ]
+    }
+]

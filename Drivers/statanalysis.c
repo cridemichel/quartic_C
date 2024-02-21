@@ -143,7 +143,7 @@ int main(int argc, char **argv)
   for (k=0; k < PEPTS; k++)
     PEHQRL[k] = 0;
 
-  sig = 1.0;
+  sig = 1.0E-9;
   sig2= 1.0;
   logdEmax=10.0;
   logdEmin=-16.0;
@@ -244,10 +244,10 @@ int main(int argc, char **argv)
 	}
       else if (cmplxreal==0)/* four real */
 	{
-	  x1c = sig*(ranf()-0.5);
-	  x2c = sig*(ranf()-0.5);
-	  x3c = sig*(ranf()-0.5);
-	  x4c = sig*(ranf()-0.5);
+	  x1c = 1000.0+sig*(ranf()-0.5);
+	  x2c = 1000.0+sig*(ranf()-0.5);
+	  x3c = 1000.0+sig*(ranf()-0.5);
+	  x4c = 1000.0+sig*(ranf()-0.5);
 	}
       
       if (cmplxreal == 5)
