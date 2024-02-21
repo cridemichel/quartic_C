@@ -20,7 +20,7 @@ EXE_TT_SB='./bin/timingtest'
 #executable for timing test of sample F
 EXE_TT_SF='./bin/timingtest_sample_F'
 #number of quartic to generate for timing tests
-NTRIALS=5000000
+NTRIALS=10000000
 #number of runs to average over in the timing tests
 NRUNS=10
 del_unuseful()
