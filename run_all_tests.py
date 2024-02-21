@@ -20,7 +20,7 @@ EXE_TT_SB='./bin/timingtest'
 #executable for timing test of sample F
 EXE_TT_SF='./bin/timingtest_sample_F'
 #number of quartic to generate for timing tests
-NTRIALS=500000
+NTRIALS=5000000
 #number of runs to average over in the timing tests
 NRUNS=10
 del_unuseful()
@@ -48,37 +48,12 @@ for a in itargs:
 ##make clean
 ##make
 ############################
-##### ACCURACY TESTS #######
-############################
-print('Performing all accuracy tests...', end='')
-sys.stdout.flush()
-os.system('rm -f ' + AT)
-for i in range(1,26):
-    os.system(EXE_AT+' '+str(i)+' >> ' + AT)
-print('done!')
-############################
-### STATISTICAL ANALYSIS ###
-############################
-print('Performing all statistical tests:')
-sys.stdout.flush()
-mapst=[ 'A', 'B', 'C', 'D', 'E', 'F' ]
-os.system('rm -fr SAMPLE_[A-F]')
-for i in range(0,6):
-    print('Testing sample ' + mapst[i] + ' for all algorithms...',end='')
-    sys.stdout.flush()
-    os.system(EXE_ST+' '+str(SAT)+' 10 '+str(i)+ ' -1 >> ' + SA)
-    os.system('mkdir SAMPLE_'+mapst[i])
-    os.system('mv -f F_of_eps_rel-*.dat SAMPLE_'+mapst[i])
-    print('done!')
-print('All statistal tests done!')
-os.system('rm -f PE-???-.dat')
-############################
 ###### TIMING TESTS  #######
 ############################
 print('Performing all timing tests:')
 def timingtest(execname,ssample,nruns,ntrials):
-    mapn=[ 'DRY', 'ODM', 'FLO', 'STR', 'FER', 'FQS', 'HQR', 'SHM' ]
-    for ity in range(0, 7):
+    mapn=[ 'DRY', 'ODM' ]
+    for ity in range(0, 2):
         fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
         print('Testing '+ mapn[ity]+'\t', end='')
         sys.stdout.flush()
@@ -113,7 +88,7 @@ def timingtest(execname,ssample,nruns,ntrials):
     oft='timings_sample'+ssample+'.txt'
     with open(oft,'w',encoding='utf8') as ff:
         ff.write('ALGO'.rjust(4)+' '+'AVG'.rjust(12)+' '+'STDDEV'.rjust(12) + '\n')
-        for ity in range(1,7):
+        for ity in range(1,2):
             fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
             with open(fn,'r',encoding='utf8') as fft:
                 lines=fft.readlines()

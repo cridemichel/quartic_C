@@ -1,0 +1,2 @@
+ALGO          AVG       STDDEV
+ ODM     1.163350     0.024835

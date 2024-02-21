@@ -16,6 +16,7 @@ extern int perm[24][4];
 extern void sort_sol_opt(complex double *sol, complex double *exsol);
 extern void sort_sol_optl(complex long double *sol, complex double *exsol);
 extern void oqs_solve_quadratic(double a, double b, complex double roots[2]);
+extern void oqs_quartic_solver_d20(double coeff[5], complex double roots[4], int chk);
 void oqs_solve_quadratic_l(double a, double b, double roots[2])
 { 
   double div,diskr,zmax,zmin;
@@ -99,16 +100,17 @@ int main(int argc, char **argv)
   complex double qr[2];
   for (i=0; i < 500000000 && !fine; i++)
     {
-      A = rint((drand48()-0.5)*100.0);
-      B = rint((drand48()-0.5)*100.0);
+      A = ((drand48()-0.5)*100.0);
+      B = ((drand48()-0.5)*100.0);
       //printf("CASE 26\n");
 
       c[4]=1.0;
-      c[3]=0.0;
+      c[3]=-1E-162;
       c[2]=A;
-      c[1]=0.0;
+      c[1]=1E-162;
       c[0]=B;
 
+#if 0
       oqs_solve_quadratic(A, B, qr);
       //printf("qr = %15G %.15G\n", qr[0], qr[1]);
       //printf("A=%.16G B=%.16G A*A - 4.0*B=%.16G\n", A, B, A*A-4*B);
@@ -116,7 +118,11 @@ int main(int argc, char **argv)
       csolREF[1]=-csqrt(qr[0]);
       csolREF[2]=csqrt(qr[1]);
       csolREF[3]=-csqrt(qr[1]);
-      oqs_quartic_solver(c, csol);     
+#else
+      oqs_quartic_solver_d20(c, csolREF, 1);     
+
+#endif
+      oqs_quartic_solver_d20(c, csol, 0);     
 
       sort_sol_opt(csol, csolREF);
 
@@ -125,7 +131,7 @@ int main(int argc, char **argv)
         {
           err += cabs(csolREF[k1])!=0?(cabs(csol[k1]-csolREF[k1])/cabs(csolREF[k1])):cabs(csol[k1]-csolREF[k1]);
         }
-      if (err > 1E-2)
+      if (err > 1E-3)
         {
           printf("BAD POLYNOMIAL\n");
           printf("x^4 + (%.16G)*x^3 + (%.16G)*x^2 + (%.16G)*x + %.16G\n", c[3], c[2], c[1], c[0]);

@@ -376,6 +376,7 @@ void oqs_NRabcd(double a, double b, double c, double d, double *AQ, double *BQ, 
   *CQ=xmin[2];
   *DQ=xmin[3];
 }
+
 void oqs_solve_quadratic(double a, double b, complex double roots[2])
 { 
   double div,sqrtd,diskr,zmax,zmin;
@@ -404,6 +405,7 @@ void oqs_solve_quadratic(double a, double b, complex double roots[2])
       roots[1]=CMPLX(-a/2,-sqrtd/2);      
     }   
 }
+
 void oqs_quartic_solver(double coeff[5], complex double roots[4])      
 {
   /* USAGE:
@@ -596,9 +598,9 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
   
-  //if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
-  if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
-   || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
+  if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
+  //if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
+  // || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)
@@ -709,4 +711,9 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       for (k=0; k < 4; k++)
         roots[k] *= rfact;
     }
+}
+void oqs_quartic_solver_d20(double coeff[5], complex roots[4], int chk)
+{
+  oqs_check_always_d20 = chk;
+  oqs_quartic_solver(coeff, roots);
 }
