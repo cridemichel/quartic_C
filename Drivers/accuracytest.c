@@ -1,5 +1,6 @@
 #include<stdlib.h>
 #include<math.h>
+#include <time.h>
 #include<stdio.h>
 #define Sqr(x) ((x)*(x))
 #include <complex.h>
@@ -14,7 +15,26 @@ extern int perm[24][4];
 
 extern void sort_sol_opt(complex double *sol, complex double *exsol);
 extern void sort_sol_optl(complex long double *sol, complex double *exsol);
+extern void oqs_solve_quadratic(double a, double b, complex double roots[2]);
+void oqs_solve_quadratic_l(double a, double b, double roots[2])
+{ 
+  double div,diskr,zmax,zmin;
+  diskr=a*a-4*b;   
+  if(a>=0.0)
+    div=-a-sqrt(diskr);
+  else
+    div=-a+sqrt(diskr);
 
+  zmax=div/2;
+
+  if(zmax==0.0)
+    zmin=0.0;
+  else
+    zmin=b/zmax;
+
+  roots[0]=zmax;
+  roots[1]=zmin;
+}
 #ifdef OQS_LONG_DBL
 long double print_accuracy_atl(char *str, complex long double *csol, complex double exsol[4])
 {
@@ -65,351 +85,55 @@ int main(int argc, char **argv)
   complex long double x1c, x2c, x3c, x4c; 
   complex double csol[4];
   complex double csolREF[4];
-  double c[5], S;
-  int num, k1, okHQR, caso;
+  double c[5], A, B, err;
+  long int i;
+  int k1;
 #ifdef OQS_LONG_DBL
   long double cl[5];
   complex long double csoll[4];
 #endif
-  if (argc == 2)
-    {
-      caso = atoi(argv[1]);
-    }
-  else
-    {
-      caso = 1;
-    }
-  if (caso <= 0 || caso > 26)
-    {
-      printf("caso must be between 1 and 25\n");
-      exit(-1);
-    }
+
+  srand48(time(NULL));
   x1c=x2c=x3c=x4c=0.0;
-  if (caso > 0)
+  int fine = 0;
+  complex double qr[2];
+  for (i=0; i < 500000000 && !fine; i++)
     {
-      switch (caso)
+      A = rint((drand48()-0.5)*1000000000.0);
+      B = rint((drand48()-0.5)*1000000000.0);
+      //printf("CASE 26\n");
+
+      c[4]=1.0;
+      c[3]=0.0;
+      c[2]=A;
+      c[1]=0.0;
+      c[0]=B;
+
+      oqs_solve_quadratic(A, B, qr);
+      //printf("qr = %15G %.15G\n", qr[0], qr[1]);
+      //printf("A=%.16G B=%.16G A*A - 4.0*B=%.16G\n", A, B, A*A-4*B);
+      csolREF[0]=csqrt(qr[0]);
+      csolREF[1]=-csqrt(qr[0]);
+      csolREF[2]=csqrt(qr[1]);
+      csolREF[3]=-csqrt(qr[1]);
+      oqs_quartic_solver(c, csol);     
+
+      sort_sol_opt(csol, csolREF);
+
+      err = 0.0;
+      for (k1=0; k1 < 4; k1++)
         {
-          /* Strobach */
-        case 14:
-          x1c = x2c = x3c = x4c = 1000;
-          print_roots("CASE 14", x1c, x2c, x3c, x4c);
-          break;
-        case 15:
-          x1c = x2c = x3c = 1000;
-          x4c = 1E-15;
-          print_roots("CASE 15", x1c, x2c, x3c, x4c);
-          break;
-        case 16:
-          x3c = 1E16 + I*1E7;
-          x4c = 1E16 - I*1E7;
-          x1c = 1 + 0.1*I;
-          x2c = 1 - 0.1*I;
-          print_roots("CASE 16", x1c, x2c, x3c, x4c);
-          break;
-        case 17:
-          x1c=10000;
-          x2c=10001;
-          x3c=10010;
-          x4c=10100;
-          print_roots("CASE 17", x1c, x2c, x3c, x4c);
-          break;
-        case 18:
-          x1c=4E5+I*3E2;
-          x2c=4E5-I*3E2;
-          x3c=3E4+I*7E3;
-          x4c=3E4-I*7E3;
-          print_roots("CASE 18", x1c, x2c, x3c, x4c);
-          break;
-        case 1:
-          x1c = 1E9;
-          x2c = 1E6;
-          x3c = 1E3;
-          x4c = 1;
-          print_roots("CASE 1", x1c, x2c, x3c, x4c);
-          break;
-        case 2:
-          x1c = 2.003;
-          x2c = 2.002;
-          x3c = 2.001;
-          x4c = 2;
-          print_roots("CASE 2", x1c, x2c, x3c, x4c);
-          break;
-        case 3:
-          x1c = 1E53;
-          x2c = 1E50;
-          x3c = 1E49;
-          x4c = 1E47;
-          print_roots("CASE 3", x1c, x2c, x3c, x4c);
-          break;
-        case 4:
-          x1c = 1E14;
-          x2c = 2;
-          x3c = 1;
-          x4c = -1;
-          print_roots("CASE 4", x1c, x2c, x3c, x4c);
-          break;
-        case 5:
-          x1c = -2E7;
-          x2c = 1E7;
-          x3c = 1;
-          x4c = -1;
-          print_roots("CASE 5", x1c, x2c, x3c, x4c);
-          break;
-        case 6:
-          x1c = 1E7;
-          x2c = -1E6;
-          x3c = 1+I;
-          x4c = 1-I;
-          print_roots("CASE 6", x1c, x2c, x3c, x4c);
-          break;
-        case 7:
-          x1c = -7;
-          x2c = -4;
-          x3c = -1E6+I*1E5;
-          x4c = -1E6-I*1E5;
-          print_roots("CASE 7", x1c, x2c, x3c, x4c);
-          break;
-        case 8:
-          x1c = 1E8;
-          x2c = 11;
-          x3c = 1E3+I;
-          x4c = 1E3-I;
-          print_roots("CASE 8", x1c, x2c, x3c, x4c);
-          break;
-        case 9:
-          x1c = 1E7+I*1E6;
-          x2c = 1E7-I*1E6;
-          x3c = 1+2*I;
-          x4c = 1-2*I;
-          print_roots("CASE 9", x1c, x2c, x3c, x4c);
-          break;
-        case 10:
-          x1c = 1E4+3*I;
-          x2c = 1E4-3*I;
-          x3c = -7+1E3*I;
-          x4c = -7-1E3*I;
-          print_roots("CASE 10", x1c, x2c, x3c, x4c);
-          break;
-        case 11:
-          x1c = 1.001+4.998*I;
-          x2c = 1.001-4.998*I;
-          x3c = 1.000+5.001*I;
-          x4c = 1.000-5.001*I;
-          print_roots("CASE 11", x1c, x2c, x3c, x4c);
-          break;
-        case 12:
-          x1c = 1E3+3*I;
-          x2c = 1E3-3*I;
-          x3c = 1E3+I;
-          x4c = 1E3-I;
-          print_roots("CASE 12", x1c, x2c, x3c, x4c);
-          break;
-        case 13:
-          x1c = 2+1E4*I;
-          x2c = 2-1E4*I;
-          x3c = 1+1E3*I;
-          x4c = 1-1E3*I;
-          print_roots("CASE 13", x1c, x2c, x3c, x4c);
-          break;
-        case 19:
-          x1c = 1E44;
-          x2c = 1E30;
-          x3c = 1E30;
-          x4c = 1.0;
-          print_roots("CASE 19", x1c, x2c, x3c, x4c);
-          break;
-        case 20:
-          x1c = 1E14;
-          x2c = 1E7;
-          x3c = 1E7;
-          x4c = 1.0;
-          print_roots("CASE 20", x1c, x2c, x3c, x4c);
-          break;
-        case 21:
-          x1c = 1E15;
-          x2c = 1E7;
-          x3c = 1E7;
-          x4c = 1.0;
-          print_roots("CASE 21", x1c, x2c, x3c, x4c);
-          break;
-        case 22:
-          x1c = 1E154;
-          x2c = 1E152;
-          x3c = 10.0;
-          x4c = 1.0;
-          print_roots("CASE 22", x1c, x2c, x3c, x4c);
-          break;
-        case 23:
-          /* condition */
-          c[4] = 1.0;
-          c[3] = 1.0;
-          c[2] = 1.0;
-          c[1] = 3.0/8.0;
-          c[0] = 0.001;
-          printf("CASE 23\n");
-          break;
-        case 24:
-          S = 1E30;
-          c[4] = 1.0;
-          c[3] = -(1.0+1.0/S);
-          c[2] = 1.0/S - S*S;
-          c[1] = S*S + S;
-          c[0] = -S;
-          printf("CASE 24\n");
-          break;
-        case 25:
-          c[4]=1.0;
-          c[3]=2.2459773428819827;
-          c[2]=-14.480985471938862;
-          c[1]=-17.678187643398402;
-          c[0]=1.0;
-          printf("CASE 25\n");
-          break;
-        case 26:
-          c[4]=-32906.0;
-          c[3]=0.0;
-          c[2]=-15252.0;
-          c[1]=0.0;
-          c[0]=17654.0;
-          printf("CASE 26\n");
-          break;
+          err += cabs(csolREF[k1])!=0?(cabs(csol[k1]-csolREF[k1])/cabs(csolREF[k1])):cabs(csol[k1]-csolREF[k1]);
+        }
+      if (err > 1E-6)
+        {
+          printf("BAD POLYNOMIAL\n");
+          printf("x^4 + (%.16G)*x^3 + (%.16G)*x^2 + (%.16G)*x + %.16G\n", c[3], c[2], c[1], c[0]);
+          print_roots("found roots", csol[0], csol[1], csol[2], csol[3]);
+          print_roots("exact roots", csolREF[0], csolREF[1], csolREF[2], csolREF[3]);
+          printf("err=%16G\n", err);
+          fine = 1;
         }
     }
-  if (caso <=22)
-    {
-      csolREF[0]=x1c;
-      csolREF[1]=x2c;
-      csolREF[2]=x3c;
-      csolREF[3]=x4c;
-#ifdef OQS_LONG_DBL
-      cl[4] = 1.0;
-      cl[3] = creall(-(x1c+x2c+x3c+x4c));
-      cl[2] = creall(x1c*x2c + (x1c+x2c)*(x3c+x4c) + x3c*x4c); 
-      cl[1] = creall(-x1c*x2c*(x3c+x4c) - x3c*x4c*(x1c+x2c));
-      cl[0] = creall(x1c*x2c*x3c*x4c);
-#endif
-      c[4] = 1.0;
-      c[3] = creall(-(x1c+x2c+x3c+x4c));
-      c[2] = creall(x1c*x2c + (x1c+x2c)*(x3c+x4c) + x3c*x4c); 
-      c[1] = creall(-x1c*x2c*(x3c+x4c) - x3c*x4c*(x1c+x2c));
-      c[0] = creall(x1c*x2c*x3c*x4c);
-    }
-  else
-    csolREF[0]=csolREF[1]=csolREF[2]=csolREF[3]=0.0;
-  printf("(%.32G)*x^4+(%.32G)*x^3+(%.32G)*x^2+(%.32G)*x+(%.32G)==0\n", c[4], c[3], c[2], c[1], c[0]);
-
-#ifdef OQS_LONG_DBL
-  oqs_quartic_solver_dl(cl, csoll);     
-#else
-  oqs_quartic_solver(c, csol);     
-#endif
-
-#ifdef OQS_LONG_DBL
-  sort_sol_optl(csoll, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[ODM] root #%d=  %.15LG+I*(%.15LG) [%.15LG + I*(%.15LG)]\n", 
-               k1, creall(csoll[k1]), cimagl(csoll[k1]), creall(csolREF[k1]), cimagl(csolREF[k1]));
-      else
-        printf("[ODM] root #%d=  %.15LG+I*(%.15LG)\n", 
-               k1, creall(csoll[k1]), cimagl(csoll[k1]));
-    }
-  if (caso <=22)
-    print_accuracy_atl("ODM", csoll, csolREF);
-#else
-  sort_sol_opt(csol, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[ODM] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[ODM] root #%d=  %.15G+I*(%.15G)\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]));
-    }
-  if (caso <=22)
-    print_accuracy_at("ODM", csol, csolREF);
-#endif
-  printf("===============================\n");
-
-  CquarticRoots(c,&num, csol);
-  sort_sol_opt(csol, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <=22)
-        printf("[FLO] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[FLO] root #%d=  %.15G+I*(%.15G)\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]));
-    } 
-  if (caso <=22)
-    print_accuracy_at("FLO", csol, csolREF);
-
-  printf("===============================\n");
-
-  CLDLT_quartic(c, csol);
-  sort_sol_opt(csol, csolREF);
-
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[STR] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[STR] root #%d=  %.15G+I*(%.15G)\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]));
-      
-    } 
-  if (caso <=22)
-    print_accuracy_at("STR", csol, csolREF);
-
-  printf("===============================\n");
-  csolve_quartic_abramovitz_cmplx(c, csol);
-  sort_sol_opt(csol, csolREF);
-
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[FER] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[FER] root #%d=  %.15G+I*(%.15G)\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]));
-
-    } 
-  if (caso <=22)
-    print_accuracy_at("FER", csol, csolREF);
-
-  printf("===============================\n");
-
-  fast_quartic_solver(c, csol);
-  sort_sol_opt(csol, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[FQS] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", k1, creal(csol[k1]), cimag(csol[k1]),
-               creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[FQS] root #%d=  %.15G+I*(%.15G)\n", k1, creal(csol[k1]), cimag(csol[k1]));
-    }
-  if (caso <=22)
-    print_accuracy_at("FQS", csol, csolREF);
-
-  printf("===============================\n");
-  solve_numrec(c, csol, &okHQR);
-  sort_sol_opt(csol, csolREF);
-  for (k1=0; k1 < 4; k1++)
-    {
-      if (caso <= 22)
-        printf("[HQR] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
-      else
-        printf("[HQR] root #%d=  %.15G+I*(%.15G)\n", 
-               k1, creal(csol[k1]), cimag(csol[k1]));
-    } 
-  if (caso <=22)
-    print_accuracy_at("HQR", csol, csolREF);
   exit(-1);
 }
