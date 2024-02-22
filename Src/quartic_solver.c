@@ -14,7 +14,7 @@
 const double cubic_rescal_fact = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps = 2.2204460492503131E-16; // DBL_EPSILON
-int oqs_check_always_d20 = 1;
+int oqs_check_always_d20 = 0;
 double oqs_max2(double a, double b)
 {
   if (a >= b)
@@ -597,10 +597,12 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   
   // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  
-  if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
-  //if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
-  // || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
+  //double fdetM = fabs(detM);
+  //double mepsd2 = fabs(macheps*d2);
+  //double fd2 = fabs(d2);
+  //if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
+  if (oqs_check_always_d20 || realcase[0]==-1 || fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
+    // || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)
