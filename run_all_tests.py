@@ -53,7 +53,7 @@ for a in itargs:
 print('Performing all accuracy tests...', end='')
 sys.stdout.flush()
 os.system('rm -f ' + AT)
-for i in range(1,26):
+for i in range(1,27):
     os.system(EXE_AT+' '+str(i)+' >> ' + AT)
 print('done!')
 ############################
