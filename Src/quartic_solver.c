@@ -14,34 +14,6 @@
 const double cubic_rescal_fact = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps = 2.2204460492503131E-16; // DBL_EPSILON
-double oqs_max2(double a, double b)
-{
-  if (a >= b)
-    return a;
-  else
-    return b;
-}
-double oqs_max3(double a, double b, double c)
-{
-  double t;
-  t = oqs_max2(a,b);
-  return oqs_max2(t,c);
-}
-
-double oqs_min2(double a, double b)
-{
-  if (a <= b)
-    return a;
-  else
-    return b;
-}
-
-double oqs_min3(double a, double b, double c)
-{
-  double t;
-  t = oqs_min2(a,b);
-  return oqs_min2(t,c);
-}
 
 void oqs_solve_cubic_analytic_depressed_handle_inf(double b, double c, double *sol)
 {
@@ -133,7 +105,7 @@ void oqs_solve_cubic_analytic_depressed(double b, double c, double *sol)
       *sol = A+B; /* this is always largest root even if A=B */
     }
 }
-double oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int scaled)
+void oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int scaled)
 {
   /* find phi0 as the dominant root of the depressed and shifted cubic 
    * in eq. (79) (see also the discussion in sec. 2.2 of the manuscript) */
@@ -232,7 +204,6 @@ double oqs_calc_phi0(double a, double b, double c, double d, double *phi0, int s
         }
     }
   *phi0 = x;
-  return f;
 }
 double oqs_calc_err_ldlt(double b, double c, double d, double d2, double l1, double l2, double l3)
 {
@@ -253,6 +224,11 @@ double oqs_calc_err_abcd_cmplx(double a, double b, double c, double d,
   sum +=(b==0)?cabs(bq + aq*cq + dq):cabs(((bq + aq*cq + dq) - b)/b);
   sum +=(a==0)?cabs(aq + cq):cabs(((aq + cq) - a)/a);
   return sum;
+}
+double oqs_calc_err_d(double errmin, double d, double bq, double dq)
+{
+  /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
+  return (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d)+errmin;
 }
 double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, double bq, double cq, double dq)
 {
@@ -414,9 +390,9 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx,dcx,cdiskr,zx1,zx2,
           zxmax,zxmin, qroots[2];
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
-  double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2,detM;
+  double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2;
   int realcase[2], whichcase, k1, k, kmin, nsol;
-  double rfactsq, rfact=1.0;
+  double rfactsq, rfact=1.0, sqrtd3;
 
   if (coeff[4]==0.0)
     {
@@ -427,7 +403,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   b=coeff[2]/coeff[4];
   c=coeff[1]/coeff[4];
   d=coeff[0]/coeff[4];
-  detM=oqs_calc_phi0(a,b,c,d,&phi0, 0);
+  oqs_calc_phi0(a,b,c,d,&phi0, 0);
 
   // simple polynomial rescaling
   if (isnan(phi0)||isinf(phi0))
@@ -438,7 +414,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
       b /= rfactsq;
       c /= rfactsq*rfact;
       d /= rfactsq*rfactsq;
-      detM=oqs_calc_phi0(a,b,c,d,&phi0, 1);
+      oqs_calc_phi0(a,b,c,d,&phi0, 1);
     }
   l1=a/2;          /* eq. (16) */                                        
   l3=b/6+phi0/2;   /* eq. (18) */                                
@@ -575,67 +551,51 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
     }
   else 
     realcase[0] = -1; // d2=0
-  /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
-  // CRITICAL FIX 04/01/2024: 
-  // if d2 == 0 then d3 != 0 and one has to consider 
-  // the case 3 (d2 = 0) to find quartic roots (see pags. 9-10 of my ACM 2020).
-  // To verify that d2==0 one can use Eq. (2) in my ACM remark, 
-  // but in addition one can also check if d3 != 0 by using Eq. (15). 
-  // To do this, we note that according to Eq.(15) 
-  // d3 = det(M)/d2 = d - d2*l2^2 + l3^2, i.e.
-  // det(M) = d2*d - d2^2*l2^2 + d2*l3^2
-  // hence to consider d3 != 0 we require that
-  // d3 > meps*min{abs(d2*d),abs(d2*d2*l2*l2),abs(l3*l3*d2)     
-  
-  // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
-  // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (realcase[0]==-1 || (fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
-      || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
+  /* Case III: d2 is 0 or approximately 0 (we always check whether this solution is better) */
+  d3 = d - l3*l3;
+  if (realcase[0]==1)
+    err0 = oqs_calc_err_d(errmin, d, bq, dq);
+  else if (realcase[0]==0)
+    err0 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx, bcx, ccx, dcx);
+  if (d3 <= 0)
     {
-      d3 = d - l3*l3;
-      if (realcase[0]==1)
-        err0 = oqs_calc_err_abcd(a, b, c, d, aq, bq, cq, dq);
-      else if (realcase[0]==0)
-        err0 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx, bcx, ccx, dcx);
-      if (d3 <= 0)
+      realcase[1] = 1;
+      sqrtd3 = sqrt(-d3);
+      aq1 = l1;   
+      bq1 = l3 + sqrtd3;
+      cq1 = l1;
+      dq1 = l3 - sqrtd3;
+      if(fabs(dq1) < fabs(bq1))  
+        dq1=d/bq1;                                        
+      else if(fabs(dq1) > fabs(bq1))
+        bq1=d/dq1;                                       
+      err1 = oqs_calc_err_abcd(a, b, c, d, aq1, bq1, cq1, dq1); /* eq. (68) */
+    }
+  else /* complex */
+    {
+      realcase[1] = 0;
+      acx1 = l1;
+      bcx1 = l3 + I*sqrt(d3);
+      ccx1 = l1;
+      dcx1 = conj(bcx1);
+      err1 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx1, bcx1, ccx1, dcx1); 
+    }
+  if (realcase[0]==-1 || err1 < err0)
+    {
+      whichcase=1; // d2 = 0
+      if (realcase[1]==1)
         {
-          realcase[1] = 1;
-          aq1 = l1;   
-          bq1 = l3 + sqrt(-d3);
-          cq1 = l1;
-          dq1 = l3 - sqrt(-d3);
-          if(fabs(dq1) < fabs(bq1))  
-            dq1=d/bq1;                                        
-          else if(fabs(dq1) > fabs(bq1))
-            bq1=d/dq1;                                       
-          err1 = oqs_calc_err_abcd(a, b, c, d, aq1, bq1, cq1, dq1); /* eq. (68) */
+          aq = aq1;
+          bq = bq1;
+          cq = cq1;
+          dq = dq1;
         }
-      else /* complex */
+      else
         {
-          realcase[1] = 0;
-          acx1 = l1;
-          bcx1 = l3 + I*sqrt(d3);
-          ccx1 = l1;
-          dcx1 = conj(bcx1);
-          err1 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx1, bcx1, ccx1, dcx1); 
-        }
-      if (realcase[0]==-1 || err1 < err0)
-        {
-          whichcase=1; // d2 = 0
-          if (realcase[1]==1)
-            {
-              aq = aq1;
-              bq = bq1;
-              cq = cq1;
-              dq = dq1;
-            }
-          else
-            {
-              acx = acx1;
-              bcx = bcx1;
-              ccx = ccx1;
-              dcx = dcx1;
-            }
+          acx = acx1;
+          bcx = bcx1;
+          ccx = ccx1;
+          dcx = dcx1;
         }
     }
   if (realcase[whichcase]==1)
