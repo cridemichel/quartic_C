@@ -98,19 +98,19 @@ int main(int argc, char **argv)
   x1c=x2c=x3c=x4c=0.0;
   int fine = 0;
   complex double qr[2];
-  for (i=0; i < 500000000 && !fine; i++)
+  for (i=0; i < 10000000 && !fine; i++)
     {
-      A = ((drand48()-0.5)*100.0);
-      B = ((drand48()-0.5)*100.0);
+      A = rint((drand48()-0.5)*10000.0);
+      B = rint((drand48()-0.5)*10000.0);
       //printf("CASE 26\n");
 
       c[4]=1.0;
-      c[3]=-1E-162;
+      c[3]=0.0;
       c[2]=A;
-      c[1]=1E-162;
+      c[1]=0.0;
       c[0]=B;
 
-#if 0
+#if 1
       oqs_solve_quadratic(A, B, qr);
       //printf("qr = %15G %.15G\n", qr[0], qr[1]);
       //printf("A=%.16G B=%.16G A*A - 4.0*B=%.16G\n", A, B, A*A-4*B);

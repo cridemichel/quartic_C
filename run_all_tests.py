@@ -20,7 +20,7 @@ EXE_TT_SB='./bin/timingtest'
 #executable for timing test of sample F
 EXE_TT_SF='./bin/timingtest_sample_F'
 #number of quartic to generate for timing tests
-NTRIALS=10000000
+NTRIALS=2000000
 #number of runs to average over in the timing tests
 NRUNS=10
 del_unuseful()
@@ -52,8 +52,8 @@ for a in itargs:
 ############################
 print('Performing all timing tests:')
 def timingtest(execname,ssample,nruns,ntrials):
-    mapn=[ 'DRY', 'ODM' ]
-    for ity in range(0, 2):
+    mapn=[ 'DRY', 'ODM', 'FLO' ]
+    for ity in range(0, 3):
         fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
         print('Testing '+ mapn[ity]+'\t', end='')
         sys.stdout.flush()
@@ -88,7 +88,7 @@ def timingtest(execname,ssample,nruns,ntrials):
     oft='timings_sample'+ssample+'.txt'
     with open(oft,'w',encoding='utf8') as ff:
         ff.write('ALGO'.rjust(4)+' '+'AVG'.rjust(12)+' '+'STDDEV'.rjust(12) + '\n')
-        for ity in range(1,2):
+        for ity in range(1,3):
             fn='timing_'+mapn[ity]+'_sample'+ssample+'.dat'
             with open(fn,'r',encoding='utf8') as fft:
                 lines=fft.readlines()

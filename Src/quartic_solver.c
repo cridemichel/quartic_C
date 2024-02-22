@@ -456,11 +456,13 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   dml3l3 = d-l3*l3;            /* dml3l3 is d3 as defined in eq. (15) with d2=0 */ 
 
   /* Three possible solutions for d2 and l2 (see eqs. (28) and discussion which follows) */
+  double d2min;
   if (bl311!=0.0)
     {
       d2m[nsol] = bl311;  
       l2m[nsol] = del2/(2.0*d2m[nsol]);   
       res[nsol] = oqs_calc_err_ldlt(b,c,d,d2m[nsol], l1, l2m[nsol], l3);
+      d2min = d2m[nsol];
       nsol++;
     }
   if (del2!=0)
@@ -470,12 +472,16 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
         {
           d2m[nsol]=del2/(2*l2m[nsol]);
           res[nsol] = oqs_calc_err_ldlt(b,c,d,d2m[nsol], l1, l2m[nsol], l3);
+          if (fabs(d2m[nsol]) < fabs(d2min))
+            d2min = d2m[nsol];
           nsol++;
         }
 
       d2m[nsol] = bl311;
       l2m[nsol] = 2.0*dml3l3/del2;
       res[nsol] = oqs_calc_err_ldlt(b,c,d,d2m[nsol], l1, l2m[nsol], l3);
+      if (fabs(bl311) < fabs(d2min))
+        d2min = bl311;
       nsol++;
     }
 
@@ -601,8 +607,11 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
   //double mepsd2 = fabs(macheps*d2);
   //double fd2 = fabs(d2);
   //if (oqs_check_always_d20 || realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
-  if (oqs_check_always_d20 || realcase[0]==-1 || fabs(d2) <= macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
-    // || fabs(detM) > macheps*oqs_min3(fabs(d2*d),fabs(d2*d2*l2*l2),fabs(l3*l3*d2))) 
+  //printf("detM=%.16G d - l3*l3=%.16G d2=%.16G detM/d2=%.16G\n", detM, d-l3*l3,d2,detM/d2);
+  //double d2alt = (2.0/3.0)*b - 0.25*a*a - phi0;  
+  //printf("d2alt=%.16G rhs=%.16G d2min=%.16G\n", d2alt, macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1), d2min);
+  if (oqs_check_always_d20 || realcase[0]==-1  ||fabs(d2) <= 10*macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))
+    // || fabs(detM) > macheps*(fabs(d2*(d-d2*l2*l2-l3*l3))))
     {
       d3 = d - l3*l3;
       if (realcase[0]==1)
