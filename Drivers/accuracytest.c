@@ -79,13 +79,13 @@ int main(int argc, char **argv)
     {
       caso = 1;
     }
-  if (caso <= 0 || caso > 25)
+  if (caso < 0 || caso > 25)
     {
-      printf("caso must be between 1 and 25\n");
+      printf("caso must be between 0 and 25\n");
       exit(-1);
     }
   x1c=x2c=x3c=x4c=0.0;
-  if (caso > 0)
+  if (caso >= 0)
     {
       switch (caso)
         {
@@ -265,9 +265,24 @@ int main(int argc, char **argv)
           c[0]=1.0;
           printf("CASE 25\n");
           break;
+        case 0:
+          c[4]=1.0;
+          c[3]=0.0;
+          c[2]=-11.0;
+          c[1]=0.0;
+          c[0]=-46.0;
+          printf("CASE 0\n");
+          break;
         }
     }
-  if (caso <=22)
+  if (caso == 0)
+    {
+      csolREF[0] =  I*sqrt(0.5*(sqrt(305.0)-11.0));
+      csolREF[1] = -I*sqrt(0.5*(sqrt(305.0)-11.0));
+      csolREF[2] =  sqrt(0.5*(11.0 + sqrt(305.0)));
+      csolREF[3] = -sqrt(0.5*(11.0 + sqrt(305.0)));
+    }
+  else if (caso <=22)
     {
       csolREF[0]=x1c;
       csolREF[1]=x2c;
