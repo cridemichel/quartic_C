@@ -103,16 +103,16 @@ The script will generate the following files:
 1) 'accuracytest.out'
    This file reports the results of all the accuracy tests which can be found in Tables 2 and 3 in the manuscript
 
-2) 'F_of_eps_rel-XXX.dat', where XXX can be OQS, FLO, STR, FER, FQS, HQR, SHM or HQRL,
+2) 'F_of_eps_rel-XXX.dat', where XXX can be ODM, FLO, STR, FER, FQS, HQR, SHM or HQRL,
    Each of these files contains for a specific algorithm the cumulative distribution 
    function as defined in Eq. (113) of the manuscript.
-   For example, to show the cumulative distribution of the OQS algorithm, one can use the command:
+   For example, to show the cumulative distribution of the ODM algorithm, one can use the command:
    
    > gnuplot
 
    gnuplot>set logscale y
 
-   gnuplot>plot 'F_of_eps_rel-OQS.dat' using 1:2 with lines
+   gnuplot>plot 'F_of_eps_rel-ODM.dat' using 1:2 with lines
    
    where '>' is the shell prompt string and 'gnuplot>' is the gnuplot prompt string
        
@@ -132,7 +132,7 @@ can be found in the zip file 'tests_out.zip'
 1) accuracytest
 
 It performs the accuracy tests shown in Table 1 of the manuscript
-for all the solvers (OQS,FLO,STR,FER,FQS and HQR).
+for all the solvers (ODM,FLO,STR,FER,FQS and HQR).
 The syntax is (where '>' is the shell prompt string):
 
 > accuracytest <case>
@@ -153,14 +153,14 @@ where
 
 <output>: every <output> trials save the the probability distribution function P(eps_rel) 
 	in the file named P_of_eps_rel-XXX.dat and the cumulative distribution function F(eps_rel) 
-	in the file named F_of_eps_rel-XXX.dat, where XXX can be OQS, FLO, STR, FER, FQS, HQR, SHM or HQRL  
+	in the file named F_of_eps_rel-XXX.dat, where XXX can be ODM, FLO, STR, FER, FQS, HQR, SHM or HQRL  
 
 <sample>: it is an integer between 0 and 5 which specifies the sample to generate 
 	according to Table 4 with 0={sample A}, 1={sample B}, 2={sample C}, 3={sample D}, 4={sample E} and
 	5={sample F}
 
 <solver>: it is an integer between 0 and 7 which specifies the quartic equation solver to use 
-	for the analysis, where 0=HQR, 1=FQS, 2=FER, 3=STR, 4=FLO, 5=OQS, 6=SHM and 7=HQRL 
+	for the analysis, where 0=HQR, 1=FQS, 2=FER, 3=STR, 4=FLO, 5=ODM, 6=SHM and 7=HQRL 
 	(-1 test all the solvers at once)
  
 3) timingtest
@@ -172,7 +172,7 @@ to perform a timing test run the command (where '>' is the shell prompt string):
 where 
 
 <solver> is an integer between 1 and 7 which specifies the quartic equation solver to test 
-with 1=OQS, 2=FLO, 3=STR, 4=FER, 5=FQS, 6=HQR and 7=SHM.
+with 1=ODM, 2=FLO, 3=STR, 4=FER, 5=FQS, 6=HQR and 7=SHM.
 
 <trials> is the number of quartic equations to solve. Roots are generated according sample B in Table 4
 of the manuscript
