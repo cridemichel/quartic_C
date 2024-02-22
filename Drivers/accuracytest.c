@@ -79,9 +79,9 @@ int main(int argc, char **argv)
     {
       caso = 1;
     }
-  if (caso < 0 || caso > 25)
+  if (caso <= 0 || caso > 26)
     {
-      printf("caso must be between 0 and 25\n");
+      printf("caso must be between 0 and 26\n");
       exit(-1);
     }
   x1c=x2c=x3c=x4c=0.0;
@@ -265,17 +265,17 @@ int main(int argc, char **argv)
           c[0]=1.0;
           printf("CASE 25\n");
           break;
-        case 0:
+        case 26:
           c[4]=1.0;
           c[3]=0.0;
           c[2]=-11.0;
           c[1]=0.0;
           c[0]=-46.0;
-          printf("CASE 0\n");
+          printf("CASE 26\n");
           break;
         }
     }
-  if (caso == 0)
+  if (caso == 26)
     {
       csolREF[0] =  I*sqrt(0.5*(sqrt(305.0)-11.0));
       csolREF[1] = -I*sqrt(0.5*(sqrt(305.0)-11.0));
@@ -328,14 +328,14 @@ int main(int argc, char **argv)
   sort_sol_opt(csol, csolREF);
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <= 22)
+      if (caso <= 22 || caso == 26)
         printf("[ODM] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
                k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
       else
         printf("[ODM] root #%d=  %.15G+I*(%.15G)\n", 
                k1, creal(csol[k1]), cimag(csol[k1]));
     }
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("ODM", csol, csolREF);
 #endif
   printf("===============================\n");
@@ -344,14 +344,14 @@ int main(int argc, char **argv)
   sort_sol_opt(csol, csolREF);
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <=22)
+      if (caso <=22 || caso == 26)
         printf("[FLO] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
                k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
       else
         printf("[FLO] root #%d=  %.15G+I*(%.15G)\n", 
                k1, creal(csol[k1]), cimag(csol[k1]));
     } 
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("FLO", csol, csolREF);
 
   printf("===============================\n");
@@ -361,7 +361,7 @@ int main(int argc, char **argv)
 
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <= 22)
+      if (caso <= 22 || caso == 26)
         printf("[STR] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
                k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
       else
@@ -369,7 +369,7 @@ int main(int argc, char **argv)
                k1, creal(csol[k1]), cimag(csol[k1]));
       
     } 
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("STR", csol, csolREF);
 
   printf("===============================\n");
@@ -378,7 +378,7 @@ int main(int argc, char **argv)
 
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <= 22)
+      if (caso <= 22 || caso == 26)
         printf("[FER] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
                k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
       else
@@ -386,7 +386,7 @@ int main(int argc, char **argv)
                k1, creal(csol[k1]), cimag(csol[k1]));
 
     } 
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("FER", csol, csolREF);
 
   printf("===============================\n");
@@ -395,13 +395,13 @@ int main(int argc, char **argv)
   sort_sol_opt(csol, csolREF);
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <= 22)
+      if (caso <= 22 || caso == 26)
         printf("[FQS] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", k1, creal(csol[k1]), cimag(csol[k1]),
                creal(csolREF[k1]), cimag(csolREF[k1]));
       else
         printf("[FQS] root #%d=  %.15G+I*(%.15G)\n", k1, creal(csol[k1]), cimag(csol[k1]));
     }
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("FQS", csol, csolREF);
 
   printf("===============================\n");
@@ -409,14 +409,14 @@ int main(int argc, char **argv)
   sort_sol_opt(csol, csolREF);
   for (k1=0; k1 < 4; k1++)
     {
-      if (caso <= 22)
+      if (caso <= 22 || caso == 26)
         printf("[HQR] root #%d=  %.15G+I*(%.15G) [%.15G + I*(%.15G)]\n", 
                k1, creal(csol[k1]), cimag(csol[k1]), creal(csolREF[k1]), cimag(csolREF[k1]));
       else
         printf("[HQR] root #%d=  %.15G+I*(%.15G)\n", 
                k1, creal(csol[k1]), cimag(csol[k1]));
     } 
-  if (caso <=22)
+  if (caso <=22 || caso == 26)
     print_accuracy_at("HQR", csol, csolREF);
   exit(-1);
 }
