@@ -15,7 +15,7 @@ double ranf(void)
   return drand48();
 }
 
-void sort_sol_optl(complex long double *sol, complex double *exsol)
+void sort_sol_optl(complex long double *sol, complex long double *exsol)
 {
   int  k1, k2, k1min;
   long double v, vmin;
