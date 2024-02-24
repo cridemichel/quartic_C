@@ -4,6 +4,11 @@
 #include<complex.h>
 extern void oqs_quartic_solver_cmplx(complex double coeff[5], complex double sol[4]);
 extern void oqs_quartic_solver(double coeff[5], complex double sol[4]);
+extern void oqs_set_fact_d0(double K);
+extern void oqs_check_always(int chk);
+extern void oqs_set_fact_d0_cmplx(double K);
+extern void oqs_check_always_cmplx(int chk);
+
 int main(void)
 {
   double c[5]; 
@@ -29,6 +34,9 @@ int main(void)
       printf("root #%d: %.16G+(%.16G)*I\n", k, creal(xc[k]),cimag(xc[k]));
     }
   printf("\nCalculated Roots:\n");
+  oqs_check_always_cmplx(0); // this the default, i.e. do not calculate the solution for d2=0. Set to a value 
+                             // different from 0 to consider the solution for d2=0
+  oqs_set_fact_d0_cmplx(1.4901161193847656E-8); // this is the default value for epsilon_c (see main text of the remark)
   oqs_quartic_solver_cmplx(cc,roots);
   for (k=0; k < 4; k++)
     {
@@ -54,6 +62,9 @@ int main(void)
       printf("root #%d: %.16G+(%.16G)*I\n", k, creal(xc[k]),cimag(xc[k]));
     }
   printf("\nCalculated Roots:\n");
+  oqs_check_always(0); // this the default, i.e. do not calculate always the solution for d2=0. Set to a value 
+                       // different from 0 to consider the solution for d2=0.
+  oqs_set_fact_d0(1.4901161193847656E-8); // this is the default value for epsilon_c (see main text of the remark)
   oqs_quartic_solver(c,roots);
   for (k=0; k < 4; k++)
     {
