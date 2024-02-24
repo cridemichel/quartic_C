@@ -14,6 +14,23 @@
 const double cubic_rescal_fact_cmplx = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact_cmplx = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps_cmplx =2.2204460492503131E-16; // = DBL_EPSILON
+double oqs_fact_d0_cmplx = 1.4901161193847656E-8; // sqrt(macheps_cmplx)
+
+int oqs_check_always_d0_cmplx = 0;
+
+void oqs_set_fact_d0_cmplx(double K)
+{
+  oqs_fact_d0_cmplx = K;
+}
+
+void oqs_check_always_cmplx(int chk)
+{
+  if (chk == 0)
+    oqs_check_always_d0_cmplx = 0;
+  else
+    oqs_check_always_d0_cmplx = 1; 
+}
+
 double oqs_max2_cmplx(double a, double b)
 {
   if (a >= b)
@@ -758,7 +775,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
       ccx = ccxv[kmin];
     }
   /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
-  if (cabs(d2) <= sqrt(macheps_cmplx)*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)))
+  if (oqs_check_always_d0_cmplx || cabs(d2) <= oqs_fact_d0_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)))
     {
       d3 = d - l3*l3;
       err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);

@@ -14,6 +14,22 @@
 const double cubic_rescal_fact = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps = 2.2204460492503131E-16; // DBL_EPSILON
+double oqs_fact_d0 = 1.4901161193847656E-8; // sqrt(macheps)
+
+int oqs_check_always_d0 = 0;
+
+void oqs_set_fact_d0(double K)
+{
+  oqs_fact_d0 = K;
+}
+
+void oqs_check_always(int chk)
+{
+  if (chk == 0)
+    oqs_check_always_d0 = 0;
+  else
+    oqs_check_always_d0 = 1; 
+}
 
 void oqs_solve_cubic_analytic_depressed_handle_inf(double b, double c, double *sol)
 {
@@ -553,7 +569,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
     realcase[0] = -1; // d2=0
   /* Case III: d2 is 0 or approximately 0 (we always check whether this solution is better) */
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (realcase[0]==-1 || (fabs(d2) <= sqrt(macheps)*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
+  if (oqs_check_always_d0 || realcase[0]==-1 || (fabs(d2) <= oqs_fact_d0*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
     {   
       d3 = d - l3*l3;
       if (realcase[0]==1)
