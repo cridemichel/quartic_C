@@ -9,21 +9,12 @@ extern void oqs_check_always(int chk);
 extern void oqs_set_fact_d0_cmplx(double K);
 extern void oqs_check_always_cmplx(int chk);
 
-int main(void)
+int main(int argc, char** argv)
 {
   double c[5]; 
   complex double cc[5], roots[4], xc[4];
   int k;
-  xc[0] = -1.5+3.0*I;
-  xc[1] = 1.0-I;
-  xc[2] = -2.5+3*I;
-  xc[3] = 1.0-2.0*I;
-  cc[4] = 1.0;
-  cc[3] = -(xc[0]+xc[1]+xc[2]+xc[3]);
-  cc[2] = xc[0]*xc[1] + (xc[0]+xc[1])*(xc[2]+xc[3]) + xc[2]*xc[3]; 
-  cc[1] = -xc[0]*xc[1]*(xc[2]+xc[3]) - xc[2]*xc[3]*(xc[0]+xc[1]);
-  cc[0] = xc[0]*xc[1]*xc[2]*xc[3];
-
+ #if 0
   printf("Complex Quartic:\n");
   printf("x^4+(%.16G+(%.16G)*I)*x^3+(%.16G+(%.16G)*I)*x^2+(%.16G+(%.16G)*I)*x+(%.16G+(%.16G)*I)==0\n",
 	 creal(cc[3]),cimag(cc[3]),creal(cc[2]),cimag(cc[2]),creal(cc[1]),cimag(cc[1]),
@@ -34,10 +25,25 @@ int main(void)
       printf("root #%d: %.16G+(%.16G)*I\n", k, creal(xc[k]),cimag(xc[k]));
     }
   printf("\nCalculated Roots:\n");
-  oqs_check_always_cmplx(0); // this the default, i.e. do not calculate the solution for d2=0. Set to a value 
+#endif
+  int i;
+  oqs_check_always_cmplx(1); // this the default, i.e. do not calculate the solution for d2=0. Set to a value 
                              // different from 0 to consider the solution for d2=0
   oqs_set_fact_d0_cmplx(1.4901161193847656E-8); // this is the default value for epsilon_c (see main text of the remark)
-  oqs_quartic_solver_cmplx(cc,roots);
+  for (i=0; i < atoi(argv[1]); i++)
+    {
+      xc[0] = -1.5*(drand48()-0.5)+3.0*(drand48()-0.5)*I;
+      xc[1] = 1.0*(drand48()-0.5)-I;
+      xc[2] = -2.5+(drand48()-0.5)*3*I;
+      xc[3] = 1.0-2.0*I*(drand48()-0.5);
+      cc[4] = 1.0;
+      cc[3] = -(xc[0]+xc[1]+xc[2]+xc[3]);
+      cc[2] = xc[0]*xc[1] + (xc[0]+xc[1])*(xc[2]+xc[3]) + xc[2]*xc[3]; 
+      cc[1] = -xc[0]*xc[1]*(xc[2]+xc[3]) - xc[2]*xc[3]*(xc[0]+xc[1]);
+      cc[0] = xc[0]*xc[1]*xc[2]*xc[3];
+      oqs_quartic_solver_cmplx(cc,roots);
+    }
+  exit(0);
   for (k=0; k < 4; k++)
     {
       printf("root #%d: %.16G+(%.16G)*I\n", k, creal(roots[k]),cimag(roots[k]));
