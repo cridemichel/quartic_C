@@ -14,6 +14,19 @@
 const double cubic_rescal_fact = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps = 2.2204460492503131E-16; // DBL_EPSILON
+double oqs_max2(double a, double b)
+{
+  if (a >= b)
+    return a;
+  else
+    return b;
+}
+double oqs_max3(double a, double b, double c)
+{
+  double t;
+  t = oqs_max2(a,b);
+  return oqs_max2(t,c);
+}
 
 void oqs_solve_cubic_analytic_depressed_handle_inf(double b, double c, double *sol)
 {
@@ -225,11 +238,6 @@ double oqs_calc_err_abcd_cmplx(double a, double b, double c, double d,
   sum +=(a==0)?cabs(aq + cq):cabs(((aq + cq) - a)/a);
   return sum;
 }
-double oqs_calc_err_d(double errmin, double d, double bq, double dq)
-{
-  /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
-  return (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d)+errmin;
-}
 double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, double bq, double cq, double dq)
 {
   /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
@@ -387,12 +395,13 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
    * the four roots will be stored in the complex array roots[] 
    *
    * */
+  const double Kfact = 2.0;
   complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx,dcx,cdiskr,zx1,zx2,
           zxmax,zxmin, qroots[2];
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
   double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2;
   int realcase[2], whichcase, k1, k, kmin, nsol;
-  double rfactsq, rfact=1.0, sqrtd3;
+  double rfactsq, rfact=1.0;
 
   if (coeff[4]==0.0)
     {
@@ -551,23 +560,23 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
     }
   else 
     realcase[0] = -1; // d2=0
-  /* Case III: d2 is 0 or approximately 0 (we always check whether this solution is better) */
+  /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
+  // PREVIOUS CONDITION: if (realcase[0]==-1 || (fabs(d2) <= macheps*oqs_max3(fabs(2.*b/3.), fabs(phi0), l1*l1))) 
   // FIX 29/12/2021: previous condition (see line above) was too stringent, hence I switched to criterion 2) in Ref. [28]
-  if (realcase[0]==-1 || (fabs(d2) <= sqrt(macheps)*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
-    {   
+  if (realcase[0]==-1 || (fabs(d2) <= Kfact*macheps*(fabs(2.*b/3.)+fabs(phi0)+l1*l1))) 
+    {
       d3 = d - l3*l3;
       if (realcase[0]==1)
-        err0 = oqs_calc_err_d(errmin, d, bq, dq);
+        err0 = oqs_calc_err_abcd(a, b, c, d, aq, bq, cq, dq);
       else if (realcase[0]==0)
         err0 = oqs_calc_err_abcd_cmplx(a, b, c, d, acx, bcx, ccx, dcx);
       if (d3 <= 0)
         {
           realcase[1] = 1;
-          sqrtd3 = sqrt(-d3);
           aq1 = l1;   
-          bq1 = l3 + sqrtd3;
+          bq1 = l3 + sqrt(-d3);
           cq1 = l1;
-          dq1 = l3 - sqrtd3;
+          dq1 = l3 - sqrt(-d3);
           if(fabs(dq1) < fabs(bq1))  
             dq1=d/bq1;                                        
           else if(fabs(dq1) > fabs(bq1))

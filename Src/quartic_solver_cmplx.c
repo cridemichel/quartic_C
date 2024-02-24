@@ -14,6 +14,34 @@
 const double cubic_rescal_fact_cmplx = 3.488062113727083E+102; //= pow(DBL_MAX,1.0/3.0)/1.618034;
 const double quart_rescal_fact_cmplx = 7.156344627944542E+76; // = pow(DBL_MAX,1.0/4.0)/1.618034;
 const double macheps_cmplx =2.2204460492503131E-16; // = DBL_EPSILON
+double oqs_max2_cmplx(double a, double b)
+{
+  if (a >= b)
+    return a;
+  else
+    return b;
+}
+double oqs_max3_cmplx(double a, double b, double c)
+{
+  double t;
+  t = oqs_max2_cmplx(a,b);
+  return oqs_max2_cmplx(t,c);
+}
+
+double oqs_min2_cmplx(double a, double b)
+{
+  if (a <= b)
+    return a;
+  else
+    return b;
+}
+
+double oqs_min3_cmplx(double a, double b, double c)
+{
+  double t;
+  t = oqs_min2_cmplx(a,b);
+  return oqs_min2_cmplx(t,c);
+}
 
 void oqs_solve_cubic_analytic_depressed_handle_inf_cmplx(complex double b, complex double c, complex double *sol)
 {
@@ -356,11 +384,6 @@ double oqs_calc_err_ldlt_cmplx(complex double b, complex double c, complex doubl
   sum += (c==0)?cabs(2.0*d2*l2 + 2.0*l1*l3):cabs(((2.0*d2*l2 + 2.0*l1*l3)-c)/c);
   sum += (d==0)?cabs(d2*l2*l2 + l3*l3):cabs(((d2*l2*l2 + l3*l3)-d)/d);
   return sum;
-}
-double oqs_calc_err_d_ccmplx(double errmin, complex double d, complex double bq, complex double dq)
-{
-  /* Eqs. (68) and (69) in the manuscript */
-  return  (d==0)?cabs(bq*dq):cabs((bq*dq-d)/d)+errmin;
 }
 double oqs_calc_err_abcd_ccmplx(complex double a, complex double b, complex double c, complex double d, 
                                 complex double aq, complex double bq, complex double cq, complex double dq)
@@ -734,26 +757,28 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
         }
       ccx = ccxv[kmin];
     }
-  /* Case III: d2 is 0 or approximately 0 (we always check whether this solution is better) */
-  d3 = d - l3*l3;
-  acx1 = l1;  
-  err0 = oqs_calc_err_d_ccmplx(errmin, d, bcx, dcx);
-  bcx1 = l3 + csqrt(-d3);
-  ccx1 = l1;
-  dcx1 = l3 - csqrt(-d3);
-
-  if(cabs(dcx1) < cabs(bcx1)) 
-    dcx1=d/bcx1;                                        
-  else if(cabs(dcx1) > cabs(bcx1))
-    bcx1=d/dcx1;                                       
-  err1 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx1, bcx1, ccx1, dcx1);
-
-  if (d2==0 || err1 < err0)
+  /* Case III: d2 is 0 or approximately 0 (in this case check which solution is better) */
+  if (cabs(d2) <= sqrt(macheps_cmplx)*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)))
     {
-      acx = acx1;
-      bcx = bcx1;
-      ccx = ccx1;
-      dcx = dcx1;
+      d3 = d - l3*l3;
+      err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);
+      acx1 = l1;  
+      bcx1 = l3 + csqrt(-d3);
+      ccx1 = l1;
+      dcx1 = l3 - csqrt(-d3);
+
+      if(cabs(dcx1) < cabs(bcx1)) 
+        dcx1=d/bcx1;                                        
+      else if(cabs(dcx1) > cabs(bcx1))
+        bcx1=d/dcx1;                                       
+      err1 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx1, bcx1, ccx1, dcx1);
+      if (d2==0 || err1 < err0)
+        {
+          acx = acx1;
+          bcx = bcx1;
+          ccx = ccx1;
+          dcx = dcx1;
+        }
     }
   if (cimag(acx)==0 && cimag(bcx)==0 && cimag(ccx)==0 && cimag(dcx)==0)
     {
