@@ -137,8 +137,9 @@ The syntax is (where '>' is the shell prompt string):
 
 > accuracytest <case>
 
-where <case> is an integer between 1 and 24, which corresponds to the 24
-cases shown in Table 1 of the manuscript.
+where <case> is an integer between 1 and 26 (first 24 cases corresponds to the
+ones shown in Table 1 of the manuscript, while last two ones are those added in the 
+previous and present remark).
 
 2) statanalysis
 
