@@ -402,6 +402,15 @@ double oqs_calc_err_ldlt_cmplx(complex double b, complex double c, complex doubl
   sum += (d==0)?cabs(d2*l2*l2 + l3*l3):cabs(((d2*l2*l2 + l3*l3)-d)/d);
   return sum;
 }
+double oqs_calc_err_d_ccmplx(double errmin, complex double d, complex double bq, complex double dq)
+{
+  /* Eqs. (68) and (69) in the manuscript */
+  double sum;
+  sum = errmin;
+  sum += (d==0)?cabs(bq*dq):cabs((bq*dq-d)/d);
+  return sum;
+}
+
 double oqs_calc_err_abcd_ccmplx(complex double a, complex double b, complex double c, complex double d, 
                                 complex double aq, complex double bq, complex double cq, complex double dq)
 {
@@ -778,7 +787,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
   if (oqs_check_always_d0_cmplx || cabs(d2) <= oqs_fact_d0_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)))
     {
       d3 = d - l3*l3;
-      err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);
+      err0 = oqs_calc_err_d_ccmplx(errmin, d, bcx, dcx);
       acx1 = l1;  
       bcx1 = l3 + csqrt(-d3);
       ccx1 = l1;
