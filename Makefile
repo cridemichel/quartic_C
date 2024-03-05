@@ -19,7 +19,7 @@ solvers:
 common: sources solvers 
 	
 accuracytest: common $(DRV)/accuracytest.c 
-	$(CC) $(CFLAGS) $(OF) -o $(BIN)/accuracytest $(DRV)/accuracytest.c $(COMOBJ) $(SRC)/quartic_solver.o -lm
+	$(CC) $(CFLAGS) $(OF) -o $(BIN)/accuracytest $(DRV)/accuracytest.c $(COMOBJ) $(SRC)/quartic_solver_cmplx.o -lm
 
 timingtest: common $(DRV)/timingtest.c 
 	$(CC) $(CFLAGS) $(OF) -o $(BIN)/timingtest $(DRV)/timingtest.c $(COMOBJ) $(SRC)/quartic_solver.o -lm

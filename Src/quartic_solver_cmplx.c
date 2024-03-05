@@ -787,6 +787,7 @@ void oqs_quartic_solver_cmplx(complex double coeff[5], complex double roots[4])
   if (oqs_check_always_d0_cmplx || cabs(d2) <= oqs_fact_d0_cmplx*(cabs(2.*b/3.)+cabs(phi0)+cabs(l1*l1)))
     {
       d3 = d - l3*l3;
+      //err0 = oqs_calc_err_abcd_ccmplx(a, b, c, d, acx, bcx, ccx, dcx);
       err0 = oqs_calc_err_d_ccmplx(errmin, d, bcx, dcx);
       acx1 = l1;  
       bcx1 = l3 + csqrt(-d3);

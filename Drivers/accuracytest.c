@@ -308,7 +308,11 @@ int main(int argc, char **argv)
 #ifdef OQS_LONG_DBL
   oqs_quartic_solver_dl(cl, csoll);     
 #else
-  oqs_quartic_solver(c, csol);     
+  complex double ccmplx[5];
+
+  for (k1=0; k1 < 5; k1++)
+    ccmplx[k1] = c[k1];
+  oqs_quartic_solver_cmplx(ccmplx, csol);     
 #endif
 
 #ifdef OQS_LONG_DBL
