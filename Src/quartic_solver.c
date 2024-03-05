@@ -244,7 +244,7 @@ double oqs_calc_err_abcd_cmplx(double a, double b, double c, double d,
 double oqs_calc_err_d(double errmin, double d, double bq, double dq)
 {
   /* Eqs. (68) and (69) in the manuscript for real alpha1 (aq), beta1 (bq), alpha2 (cq) and beta2 (dq)*/
-  return (d==0)?fabs(bq*dq):fabs((bq*dq-d)/d)+errmin;
+  return ((d==0)?fabs(bq*dq):fabs((bq*dq-d)/d))+errmin;
 }
 double oqs_calc_err_abcd(double a, double b, double c, double d, double aq, double bq, double cq, double dq)
 {
