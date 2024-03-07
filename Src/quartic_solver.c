@@ -403,7 +403,7 @@ void oqs_quartic_solver(double coeff[5], complex double roots[4])
    * the four roots will be stored in the complex array roots[] 
    *
    * */
-  complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx,dcx,cdiskr,zx1,zx2,
+  complex double acx1, bcx1, ccx1, dcx1,acx=0.0+I*0.0,bcx=0.0+I*0.0,ccx=0.0,dcx=0.0,cdiskr,zx1,zx2,
           zxmax,zxmin, qroots[2];
   double l2m[12], d2m[12], res[12], resmin, bl311, dml3l3, err0=0, err1=0, aq1, bq1, cq1, dq1; 
   double a,b,c,d,phi0,aq,bq,cq,dq,d2,d3,l1,l2,l3, errmin, errv[3], aqv[3], cqv[3],gamma,del2;
