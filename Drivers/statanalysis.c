@@ -38,7 +38,7 @@ void print_legend(FILE *f)
     fprintf(f,"@    s%d legend \"%s\"\n", dojust, ic2algo(dojust));
 }
 int maxic=7, icref;
-char fname[256];
+char fname[1024];
 void save_PE(long long int numtrials, int numpts, double dlogdE, double logdEmin)
 {
   FILE *f;
